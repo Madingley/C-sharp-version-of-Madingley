@@ -1,6 +1,8 @@
 .vs/
 *.aux.xml
 /Madingley/bin
+/Madingley/input/Data
+/Madingley/input/ModelStates
 /Madingley/obj
 /Madingley.suo
 /Madingley.v12.suo
