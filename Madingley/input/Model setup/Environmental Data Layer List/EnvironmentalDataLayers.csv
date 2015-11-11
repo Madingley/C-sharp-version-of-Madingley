@@ -8,6 +8,7 @@ Local,input/Data/Original/Ocean,KennedyetalDTR_monthly_climatology,.nc,DTR,nc,Oc
 Local,input/Data/Original/Ocean,averaged_u_50y_top100m_monthly,.nc,uVel,nc,uVel,Y,month,cm/s
 Local,input/Data/Original/Ocean,averaged_v_50y_top100m_monthly,.nc,vVel,nc,vVel,Y,month,cm/s
 Local,input/Data/Original/Ocean,averaged_SST_50y_top100m_monthly,.nc,SST,nc,SST,Y,month,degC
+Local,input/Data/Original/Ocean,bob,.nc,intpp,nc,LargePhytoplankton,N,month,molC/m2/s
 FetchClimate,,,,temperature,,Temperature,Y,month,degC
 FetchClimate,,,,land_dtr,,LandDTR,Y,month,degC
 FetchClimate,,,,temperature_ocean,,OceanTemp,Y,month,degC
