@@ -1,0 +1,3 @@
+DEFINITION_Heterotroph/Autotroph,DEFINITION_Nutrition source,DEFINITION_Diet,DEFINITION_Realm,DEFINITION_Mobility,DEFINITION_Reproductive strategy,DEFINITION_Endo/Ectotherm,PROPERTY_Herbivory assimilation,PROPERTY_Carnivory assimilation,PROPERTY_Proportion time eating,PROPERTY_Minimum mass,PROPERTY_Maximum mass,PROPERTY_Initial number of GridCellCohorts
+Heterotroph,Herbivore,Planktivore,Marine,Planktonic,iteroparity,Endotherm,0.15,0,0.8,0.000001,100000,10
+Heterotroph,Herbivore,All,Terrestrial,Mobile,iteroparity,Endotherm,0.15,0,0.8,0.000001,100000,10

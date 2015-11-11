@@ -1,0 +1,20 @@
+DEFINITION_Heterotroph/Autotroph,DEFINITION_Nutrition source,DEFINITION_Diet,DEFINITION_Realm,DEFINITION_Mobility,DEFINITION_Reproductive strategy,DEFINITION_Endo/Ectotherm,PROPERTY_Herbivory assimilation,PROPERTY_Carnivory assimilation,PROPERTY_Proportion suitable time active,PROPERTY_Minimum mass,PROPERTY_Maximum mass,PROPERTY_Initial number of GridCellCohorts,NOTES_group description
+Heterotroph,Omnivore,AllSpecial,Marine,Mobile,iteroparity,Endotherm,0,0.8,0.5,10000,150000000,100,Baleen whales
+Heterotroph,Carnivore,All,Marine,Mobile,iteroparity,Endotherm,0,0.8,0.5,100,50000000,100,Carnivorous endotherms
+Heterotroph,Carnivore,All,Marine,Mobile,iteroparity,Ectotherm,0,0.8,0.5,0.0001,2000000,100,Carnivorous ectotherms (inc eating zooplankton)
+Heterotroph,Carnivore,All,Marine,Mobile,semelparity,Ectotherm,0,0.8,0.5,0.0001,2000000,100,Carnivorous ectotherms (inc eating zooplankton)
+Heterotroph,Herbivore,Planktivore,Marine,Mobile,iteroparity,Ectotherm,0.7,0,0.5,0.0001,10000,100,"Herbivorous ectos (inc e.g. krill, assumed larger fishes)"
+Heterotroph,Herbivore,Planktivore,Marine,Mobile,semelparity,Ectotherm,0.7,0,0.5,0.0001,10000,100,"Herbivorous ectos (inc e.g. krill, assumed larger fishes)"
+Heterotroph,Omnivore,All,Marine,Mobile,iteroparity,Ectotherm,0.6,0.64,0.5,0.00001,100000,100,Omnivorous ectos
+Heterotroph,Omnivore,All,Marine,Mobile,semelparity,Ectotherm,0.6,0.64,0.5,0.00001,100000,100,Omnivorous ectos
+Heterotroph,Herbivore,Planktivore,Marine,Planktonic,iteroparity,Ectotherm,0.7,0,0.5,0.00001,0.1,100,Obligate zooplankton
+Heterotroph,Herbivore,Planktivore,Marine,Planktonic,semelparity,Ectotherm,0.7,0,0.5,0.00001,0.1,100,Obligate zooplankton
+Heterotroph,Herbivore,All,Terrestrial,Mobile,iteroparity,Endotherm,0.5,0,0.5,1.5,5000000,112,None
+Heterotroph,Carnivore,All,Terrestrial,Mobile,iteroparity,Endotherm,0,0.8,0.5,3,700000,112,None
+Heterotroph,Omnivore,All,Terrestrial,Mobile,iteroparity,Endotherm,0.4,0.64,0.5,3,1500000,112,None
+Heterotroph,Herbivore,All,Terrestrial,Mobile,semelparity,Ectotherm,0.5,0,0.5,0.0004,1000,112,None
+Heterotroph,Carnivore,All,Terrestrial,Mobile,semelparity,Ectotherm,0,0.8,0.5,0.0008,2000,112,None
+Heterotroph,Omnivore,All,Terrestrial,Mobile,semelparity,Ectotherm,0.4,0.64,0.5,0.0004,2000,112,None
+Heterotroph,Herbivore,All,Terrestrial,Mobile,iteroparity,Ectotherm,0.5,0,0.5,1,300000,112,None
+Heterotroph,Carnivore,All,Terrestrial,Mobile,iteroparity,Ectotherm,0,0.8,0.5,1.5,2000000,112,None
+Heterotroph,Omnivore,All,Terrestrial,Mobile,iteroparity,Ectotherm,0.4,0.64,0.5,1.5,55000,112,None

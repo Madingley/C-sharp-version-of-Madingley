@@ -1,0 +1,619 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Madingley.Activity" Collapsed="true">
+    <Position X="13.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AATAAQAAAgAIQEAAAgABQQAAAAABQABAABQAAADCAAI=</HashCode>
+      <FileName>Ecological processes cohorts\Activity.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.AdvectiveDispersal" Collapsed="true">
+    <Position X="9.5" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>RBIAEBAggAEIAEAAAEAAQgAAIIAAAASAAAAAAFgAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Dispersal implementations\AdvectiveDispersal.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Madingley.CommonDispersalMethods" Collapsed="true">
+    <Position X="11" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAA=</HashCode>
+      <FileName>Ecological processes cohorts\Dispersal implementations\CommonDispersalMethods.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.DiffusiveDispersal" Collapsed="true">
+    <Position X="11" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>RAAAABIAAAEAAEAAAEAAAAAAIAUAAACAABAAgAAgAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Dispersal implementations\DiffusiveDispersal.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Madingley.ResponsiveDispersal" Collapsed="true">
+    <Position X="12.5" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>RAAAADIEAAEAAEAAAEAAAAACIIUAAACACBAAgAAAAIA=</HashCode>
+      <FileName>Ecological processes cohorts\Dispersal implementations\ResponsiveDispersal.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Madingley.Dispersal" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="9.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAIAAAAAAAAAQAAAAAAAAAAAAAAACAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Dispersal.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.RevisedHerbivory" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="15" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>xABGihQEQAFoDUERAAAAgEQwMMEYYBAQQABCiAFRAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Eating implementations\RevisedHerbivory.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.RevisedPredation" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="15" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>VMDGAhAEaFFILUMjAQIZYMtZM6EYcgIRSBBGCEVJoCE=</HashCode>
+      <FileName>Ecological processes cohorts\Eating implementations\RevisedPredation.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.Eating" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="15" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAEABAAAAAAAAQAAAgAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Eating.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.EcologicalParameters" Collapsed="true">
+    <Position X="12.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAYAAAAAAAEA=</HashCode>
+      <FileName>Ecological processes cohorts\EcologicalParameters.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.MetabolismEctotherm" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="16.5" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>RATBgJAAAABAgFAAAgBAAQAAIIARABAAIBQAAAAEAAQ=</HashCode>
+      <FileName>Ecological processes cohorts\Metabolism implementations\MetabolismEctotherm.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.MetabolismEndotherm" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="16.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>RAABgJAAAABACFAAAABAAAAAIAABAAAAIAAAAAAEAAQ=</HashCode>
+      <FileName>Ecological processes cohorts\Metabolism implementations\MetabolismEndotherm.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.Metabolism" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="16.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAAABAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Metabolism.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.BackgroundMortality" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="18" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>xAAIABAAAAAAAEAAAAAAAQAAIAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Mortality implementations\BackgroundMortality.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.SenescenceMortality" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="18" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>xAIIABAAAABAAEAAAAAAAQAAIAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Mortality implementations\SenescenceMortality.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.StarvationMortality" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="18" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>xAEAABAAAAAAAEAAAUAAAAAAMAAAAAAAAAIAAQBAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Mortality implementations\StarvationMortality.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.Mortality" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="18" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAAABAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Mortality.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.ReproductionBasic" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="19.5" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>RAACgBAEgAMAAEQAIgAAEAAAIAAAAACACQAAAAAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Reproduction implementations\ReproductionBasic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.Reproduction" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="19.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAAABAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Reproduction.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.ClimateChange" Collapsed="true">
+    <Position X="10" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Impacts\ClimateChange.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.ApplyFishingCatches" Collapsed="true">
+    <Position X="11.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgACAAAAAAAAAAAAAAAAAQAAAkAAAAEAAAAAAA=</HashCode>
+      <FileName>Impacts\Fisheries\ApplyFishingCatches.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.FishTraits" Collapsed="true">
+    <Position X="11.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACACQgAAAIAABAABQAAAAAAAAABAABAAAAAAAAAAA=</HashCode>
+      <FileName>Impacts\Fisheries\FishTraits.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.InputCatchData" Collapsed="true">
+    <Position X="11.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>hQAABIgAABBAACAQgBACECAAEAAMAAAAAIJAAQgAAAA=</HashCode>
+      <FileName>Impacts\Fisheries\InputCatchData.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.LWAllometries" Collapsed="true">
+    <Position X="11.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Impacts\Fisheries\LWAllometries.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.HumanAutotrophMatterAppropriation" Collapsed="true">
+    <Position X="10" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Impacts\HANPP.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.Harvesting" Collapsed="true">
+    <Position X="10" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAEABAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAI=</HashCode>
+      <FileName>Impacts\Harvesting.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.ImpactsSpatialHandler" Collapsed="true">
+    <Position X="10" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgABAAAAABIAAIAAAAgQAAIAQAABAAAAACAA=</HashCode>
+      <FileName>Impacts\ImpactsSpatialHandler.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.ApplyCrossGridCellEcology" Collapsed="true">
+    <Position X="5.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model structure\ApplyCrossGridCellEcology.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.ApplyEcology" Collapsed="true">
+    <Position X="5.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAEAAAAAAAAEAAAAAAAAAAEAAAACAAAAAA=</HashCode>
+      <FileName>Model structure\ApplyEcology.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.ArraySDSConvert" Collapsed="true">
+    <Position X="16.25" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAIAAAAAAAAAgAAAAAAAAAAAAAEAAYAAAgAA=</HashCode>
+      <FileName>Model structure\ArraySDSConvert.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.AutotrophProcessor" Collapsed="true">
+    <Position X="21.25" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAQAAAAAARAIAAAAAAAAAAAAAAAAAAAAAAAAAAAgAA=</HashCode>
+      <FileName>Model structure\AutotrophProcessor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.BasicTerrestrialPlantModel" Collapsed="true">
+    <Position X="21.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABIAK64ABoBIAGEAEJFBFQDASgAIBgoITAAAQCgigAY=</HashCode>
+      <FileName>Model structure\BasicTerrestrialPlantModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.Cohort" Collapsed="true">
+    <Position X="5.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>yAACAACBAAAAkBAAQAQEBCIAgAEEAQgQhAAAQiAAEAA=</HashCode>
+      <FileName>Model structure\Cohort.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.CohortMerge" Collapsed="true">
+    <Position X="5.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgCAAAAAAAEAAAQAAAAIAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model structure\CohortMerge.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.CreateSDSObject" Collapsed="true">
+    <Position X="14.75" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>Model structure\CreateSDSObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.EcologyCohort" Collapsed="true">
+    <Position X="13.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEQAUABAIAAAAAAAAAAAACgAEQAABAAACAAAAIAAA=</HashCode>
+      <FileName>Model structure\EcologyCohort.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.EcologyCrossGridCell" Collapsed="true">
+    <Position X="9.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAAAAAAAAACAAAggAAABAEAAAAAAAEAAAA=</HashCode>
+      <FileName>Model structure\EcologyCrossGridCell.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.EcologyStock" Collapsed="true">
+    <Position X="21.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABIEAAAAAAAAAAAAAAAAAAIEAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model structure\EcologyStock.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.EnviroData" Collapsed="true">
+    <Position X="6.75" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAACEAAQMABIAAgCwwIIAABEIQAANAYgEFAABCACAAg=</HashCode>
+      <FileName>Model structure\EnviroData.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.FunctionalGroupDefinitions" Collapsed="true">
+    <Position X="5.25" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAEACABEAAigAACAgAAAMQgCAAABAAAABA=</HashCode>
+      <FileName>Model structure\FunctionalGroupDefinitions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.GridCell" Collapsed="true">
+    <Position X="6.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QIAAAARCAEFAEECAAAAMAEQAAAAAmAAAEAAAAICAABg=</HashCode>
+      <FileName>Model structure\GridCell.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.GridCellCohortHandler" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="6.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEIAAEAAAAAAABQQCAAABAQAAAAACAAECAAAAABQIAA=</HashCode>
+      <FileName>Model structure\GridCellCohortHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.GridCellCohortsEnum" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="6.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAABAAAAACAIAAAAAAACAAAIAAAAAAAAAA=</HashCode>
+      <FileName>Model structure\GridCellCohortHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.GridCellStockHandler" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="6.75" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEIAAEACAAAAABAQCAAABAQAAAAAAAAECAAAAABQIAA=</HashCode>
+      <FileName>Model structure\GridCellStockHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.GridCellStocksEnum" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="6.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACACAABAAAAACAIAAAAAAAAAAAIAAAAAAAAAA=</HashCode>
+      <FileName>Model structure\GridCellStockHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Madingley.InputModelState" Collapsed="true">
+    <Position X="5.25" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACAAAAAAAAAAAAAAAAAEAAiAAAEAgAAAAAAAA=</HashCode>
+      <FileName>Model structure\InputModelState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.ThreadLockedParallelVariables" Collapsed="true">
+    <Position X="13.25" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAABIAAAAAAAAAAAAAAAAAAAAAAAAAAAACA=</HashCode>
+      <FileName>Model structure\MadingleyModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.MadingleyModel" Collapsed="true">
+    <Position X="3.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gABG4QowQEBRAABKBBCJgeJ4EGoUBAQC0CUAgKAkAAw=</HashCode>
+      <FileName>Model structure\MadingleyModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.MadingleyModelInitialisation" Collapsed="true">
+    <Position X="3.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EYBWwZoI0AFDKCDY4AOLwSrBUOYCgQILEA8CUCoEBAg=</HashCode>
+      <FileName>Model structure\MadingleyModelInitialisation.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.ModelGrid" Collapsed="true">
+    <Position X="3.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>xAAG4HXygQVAOgACmgsSaECmCQIjASAKBEA4mIEIAI0=</HashCode>
+      <FileName>Model structure\ModelGrid.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.Program" Collapsed="true">
+    <Position X="1.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Model structure\Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.RevisedTerrestrialPlantModel" Collapsed="true">
+    <Position X="21.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABIAC6QABoBIAGEAEBFBFADESgBIBhoITAAAQCgigAY=</HashCode>
+      <FileName>Model structure\RevisedTerrestrialPlantModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.RunSimulations" Collapsed="true">
+    <Position X="1.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAIAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model structure\RunSimulations.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.ScenarioParameterInitialisation" Collapsed="true">
+    <Position X="3.75" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgEAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Model structure\ScenarioParameterInitialisation.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.Stock" Collapsed="true">
+    <Position X="5.25" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACBAAAAAAAAQAAABAAAQAQAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model structure\Stock.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.ViewGrid" Collapsed="true">
+    <Position X="10.25" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAAAAAAAAAgAAAAAAAAAEgAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model structure\ViewGrid.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.CrossCellProcessTracker" Collapsed="true">
+    <Position X="7.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AoAAAACAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAASAAA=</HashCode>
+      <FileName>Output and tracking\Cross cell\CrossCellProcessTracker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.DispersalTracker" Collapsed="true">
+    <Position X="4.5" Y="11" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EgAABAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Output and tracking\Cross cell\DispersalTracker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.EatingTracker" Collapsed="true">
+    <Position X="4.5" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAACAAAABAQAAAAAAAIAABAAgAAAAAAAAAAAIE=</HashCode>
+      <FileName>Output and tracking\EatingTracker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.EcosytemMetrics" Collapsed="true">
+    <Position X="3" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAICAARAEAAgCAAFAAFAAAAAAAAAQAgAAgQCIAggAAA=</HashCode>
+      <FileName>Output and tracking\EcosytemMetrics.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.ExtinctionTracker" Collapsed="true">
+    <Position X="4.5" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIAAAAAAAAAAEAAAAAAIIAAAAAAAAA=</HashCode>
+      <FileName>Output and tracking\ExtinctionTracker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.FeedingInteractions" Collapsed="true">
+    <Position X="4.5" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ggCAAAgACAAAAECAAAAAAQSEAAAAAAQAACAACAAAgAA=</HashCode>
+      <FileName>Output and tracking\FeedingInteractions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.GlobalNPPTracker" Collapsed="true">
+    <Position X="6" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gACAAAAAAAAIAAACAAAIgAAAEIAAAAAgAAACAhAAAAA=</HashCode>
+      <FileName>Output and tracking\GlobalNPPTracker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.GlobalProcessTracker" Collapsed="true">
+    <Position X="6" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAgAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAhMAAAg=</HashCode>
+      <FileName>Output and tracking\GlobalProcessTracker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.GrowthTracker" Collapsed="true">
+    <Position X="4.5" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAABAAAAAAAAAEAAAAAAAAAAABAAAAAQAAA=</HashCode>
+      <FileName>Output and tracking\GrowthTracker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.MetabolismTracker" Collapsed="true">
+    <Position X="4.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAEAAAIAAAAEAAAAAAAAACAAAAAAAAAAAA=</HashCode>
+      <FileName>Output and tracking\MetabolismTracker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.MortalityTracker" Collapsed="true">
+    <Position X="4.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQCAAAAAEAAAEAAAAAAAQQCAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Output and tracking\MortalityTracker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.OutputCell" Collapsed="true">
+    <Position X="3" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>1AKQMkQQAIHAIBVDAAuaNQpgWgigVAEBQCRAAIgAAZI=</HashCode>
+      <FileName>Output and tracking\OutputCell.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.OutputGlobal" Collapsed="true">
+    <Position X="3" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gACAMgQAAAAAAAhBAQCCBQMAQAYAEAACQAJAAAAEAhA=</HashCode>
+      <FileName>Output and tracking\OutputGlobal.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.OutputGrid" Collapsed="true">
+    <Position X="3" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>kADQEEAQBIAAQAxACEiAQQIAQIgARAAAQIQIAAgAARA=</HashCode>
+      <FileName>Output and tracking\OutputGrid.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.OutputModelState" Collapsed="true">
+    <Position X="3" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ggCAAAAgAAAAAAAAAAAAAQAASAAAAQAAAAAABAEABAQ=</HashCode>
+      <FileName>Output and tracking\OutputModelState.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.PredationTracker" Collapsed="true">
+    <Position X="4.5" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>hgCAgAAAAAQAAAgAAAAAIAAAAAAAAAQAAAMAAAAAECA=</HashCode>
+      <FileName>Output and tracking\PredationTracker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.ProcessTracker" Collapsed="true">
+    <Position X="4.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CqAEgAAENAABBAEAFAEAAQAACEAAgAAoAIEEUAIAEAg=</HashCode>
+      <FileName>Output and tracking\ProcessTracker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.ReproductionTracker" Collapsed="true">
+    <Position X="4.5" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAgAABAEAAAAEAAAAAAAAAEAAAAAAAgAAAAQAABAAA=</HashCode>
+      <FileName>Output and tracking\ReproductionTracker.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.ClimateVariablesCalculator" Collapsed="true">
+    <Position X="6.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAEAAAAAEAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Utility classes\ClimateVariablesCalculator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.MassBinsHandler" Collapsed="true">
+    <Position X="5.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>hAAAAAAAAAAAAAAAAAAAACAAAAAAAAAIAAAAAAAAAAA=</HashCode>
+      <FileName>Utility classes\MassBinsHandler.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.NonStaticSimpleRNG" Collapsed="true">
+    <Position X="11.75" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gFAABAAAAQAEABCAAAACAQAAQAIAAEAAAAAoAAAAAAQ=</HashCode>
+      <FileName>Utility classes\NonStaticSimpleRNG.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Madingley.UtilityFunctions" Collapsed="true">
+    <Position X="8.75" Y="10.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAQAAAAAAAAAQAAAAAAECAAAAAAAoABAgAIgAAQ=</HashCode>
+      <FileName>Utility classes\UtilityFunctions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Madingley.IDispersalImplementation" Collapsed="true">
+    <Position X="11" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>RAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Dispersal implementations\Technical code\IDispersalImplementation.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Madingley.IEatingImplementation" Collapsed="true">
+    <Position X="15" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>RABEAAAEAAEAAAEAAAAAAEAAAAAQAAAAAABAAAAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Eating implementations\Technical code\IEatingImplementation.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Madingley.IMetabolismImplementation" Collapsed="true">
+    <Position X="16.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>RAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Metabolism implementations\Technical code\IMetabolismImplementation.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Madingley.IMortalityImplementation" Collapsed="true">
+    <Position X="18" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Mortality implementations\Technical code\IMortalityImplementation.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Madingley.IReproductionImplementation" Collapsed="true">
+    <Position X="19.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>RAAAAAAAAAAAAAAAAAAAEAAAAAAAAACAAAAAAAAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Reproduction implementations\Technical code\IReproductionImplementation.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Madingley.IEcologicalProcessAcrossGridCells" Collapsed="true">
+    <Position X="9.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Technical code\IEcologicalProcessAcrossGridCells.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Madingley.IEcologicalProcessWithinGridCell" Collapsed="true">
+    <Position X="19.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Ecological processes cohorts\Technical code\IEcologicalProcessWithinGridCells.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

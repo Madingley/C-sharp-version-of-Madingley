@@ -1,0 +1,11 @@
+.vs/
+*.aux.xml
+/Madingley/bin
+/Madingley/obj
+/Madingley.suo
+/Madingley.v12.suo
+/Madingley.user
+/Madingley.v11.suo
+/packages
+/Madingley/packages.config
+

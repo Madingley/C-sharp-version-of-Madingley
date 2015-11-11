@@ -1,0 +1,411 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5C7F5543-3D0C-4040-90B1-1AEB5E972A09}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Madingley</RootNamespace>
+    <AssemblyName>Madingley</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>documentation.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>documentation.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <DocumentationFile>bin\x64\Release\Madingley.XML</DocumentationFile>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\Madingley.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <DocumentationFile>documentation.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Accessibility">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="ChunkedStorageCore, Version=1.3.14517.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Program Files (x86)\Reference Assemblies\Microsoft\Research\Scientific DataSet 1.3\ChunkedStorageCore.dll</HintPath>
+    </Reference>
+    <Reference Include="DynamicInterop">
+      <HintPath>..\packages\DynamicInterop.0.7.4\lib\net40\DynamicInterop.dll</HintPath>
+    </Reference>
+    <Reference Include="FetchClimate">
+      <HintPath>References\FetchClimate.exe</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Ccr.Core, Version=2.2.76.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Program Files (x86)\Reference Assemblies\Microsoft\Research\Scientific DataSet 1.3\Microsoft.Ccr.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Research.Science.Data, Version=1.2.8657.0, Culture=neutral, PublicKeyToken=e550de0161496f12, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Program Files (x86)\Reference Assemblies\Microsoft\Research\Scientific DataSet 1.3\Microsoft.Research.Science.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Research.Science.Data.AzureDataSet, Version=1.3.14517.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Program Files (x86)\Reference Assemblies\Microsoft\Research\Scientific DataSet 1.3\Microsoft.Research.Science.Data.AzureDataSet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Research.Science.Data.EsriGrid, Version=1.3.14517.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Program Files (x86)\Reference Assemblies\Microsoft\Research\Scientific DataSet 1.3\Microsoft.Research.Science.Data.EsriGrid.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Research.Science.Data.NotifiableProperties, Version=1.3.14517.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Program Files (x86)\Reference Assemblies\Microsoft\Research\Scientific DataSet 1.3\Microsoft.Research.Science.Data.NotifiableProperties.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Research.Science.Data.Shapefile, Version=1.3.14517.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Program Files (x86)\Reference Assemblies\Microsoft\Research\Scientific DataSet 1.3\Microsoft.Research.Science.Data.Shapefile.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NetCDF.Interop, Version=1.3.14517.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Windows\Microsoft.NET\assembly\GAC_64\NetCDF.Interop\v4.0_1.3.14517.0__31bf3856ad364e35\NetCDF.Interop.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="RDotNet">
+      <HintPath>..\packages\R.NET.Community.1.5.21\lib\net40\RDotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="RDotNet.NativeLibrary">
+      <HintPath>..\packages\R.NET.Community.1.5.21\lib\net40\RDotNet.NativeLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="RserveCli, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\RserveCLI\RServeCLI\bin\x64\Debug\RserveCli.dll</HintPath>
+    </Reference>
+    <Reference Include="SDSArrays, Version=1.3.14517.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Windows\Microsoft.NET\assembly\GAC_64\SDSArrays\v4.0_1.3.14517.0__31bf3856ad364e35\SDSArrays.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Ecology\Ecological processes cohorts\Activity.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Dispersal implementations\CommonDispersalMethods.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Dispersal implementations\ResponsiveDispersal.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Dispersal implementations\AdvectiveDispersal.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Dispersal implementations\DiffusiveDispersal.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Dispersal implementations\Technical code\TResponsiveDispersal.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Dispersal implementations\Technical code\TAdvectiveDispersal.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Dispersal implementations\Technical code\TDiffusiveDispersal.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Dispersal.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Dispersal implementations\Technical code\IDispersalImplementation.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Eating implementations\RevisedHerbivory.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Eating implementations\RevisedPredation.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Eating implementations\Technical code\TRevisedPredation.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Eating implementations\Technical code\TRevisedHerbivory.cs" />
+    <Compile Include="Ecology\EcologicalParameters.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Metabolism implementations\MetabolismEctotherm.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Metabolism implementations\MetabolismEndotherm.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Metabolism implementations\Technical code\IMetabolismImplementation.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Metabolism implementations\Technical code\TMetabolismEctotherm.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Metabolism implementations\Technical code\TMetabolismEndotherm.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Metabolism.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Mortality implementations\BackgroundMortality.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Eating.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Mortality implementations\Technical code\IMortalityImplementation.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Mortality implementations\SenescenceMortality.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Mortality implementations\StarvationMortality.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Mortality implementations\Technical code\TBackgroundMortality.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Mortality implementations\Technical code\TSenescenceMortality.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Mortality implementations\Technical code\TStarvationMortality.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Mortality.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Reproduction implementations\Technical code\IReproductionImplementation.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Reproduction implementations\ReproductionBasic.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Reproduction implementations\Technical code\TReproductionBasic.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Technical code\IEcologicalProcessWithinGridCells.cs" />
+    <Compile Include="Impacts\ClimateChange.cs" />
+    <Compile Include="Impacts\Fisheries\ApplyFishingCatches.cs" />
+    <Compile Include="Impacts\Fisheries\FishTraits.cs" />
+    <Compile Include="Impacts\Fisheries\InputCatchData.cs" />
+    <Compile Include="Impacts\Fisheries\LWAllometries.cs" />
+    <Compile Include="Impacts\Harvesting.cs" />
+    <Compile Include="Impacts\ImpactsSpatialHandler.cs" />
+    <Compile Include="Model structure\ApplyEcology.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Eating implementations\Technical code\IEatingImplementation.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Technical code\IEcologicalProcessAcrossGridCells.cs" />
+    <Compile Include="Ecology\Ecological processes stocks\AutotrophProcessor.cs" />
+    <Compile Include="Model structure\CohortMerge.cs" />
+    <Compile Include="Model structure\ApplyCrossGridCellEcology.cs" />
+    <Compile Include="Model structure\EcologyCrossGridCell.cs" />
+    <Compile Include="Model structure\EcologyCohort.cs" />
+    <Compile Include="Model structure\EcologyStock.cs" />
+    <Compile Include="Model structure\GridCellCohortHandler.cs" />
+    <Compile Include="Model structure\ArraySDSConvert.cs" />
+    <Compile Include="Model structure\Cohort.cs" />
+    <Compile Include="Model structure\CreateSDSObject.cs" />
+    <Compile Include="Model structure\FunctionalGroupDefinitions.cs" />
+    <Compile Include="Ecology\Ecological processes cohorts\Reproduction.cs" />
+    <Compile Include="Model structure\GridCellStockHandler.cs" />
+    <Compile Include="Impacts\HANPP.cs" />
+    <Compile Include="Model structure\InputModelState.cs" />
+    <Compile Include="Model structure\MadingleyModelInitialisation.cs" />
+    <Compile Include="Ecology\Ecological processes stocks\RevisedTerrestrialPlantModel.cs" />
+    <Compile Include="Output and tracking\Cross cell\DispersalTracker.cs" />
+    <Compile Include="Output and tracking\Cross cell\CrossCellProcessTracker.cs" />
+    <Compile Include="Output and tracking\EatingTracker.cs" />
+    <Compile Include="Output and tracking\EcosytemMetrics.cs" />
+    <Compile Include="Output and tracking\ExtinctionTracker.cs" />
+    <Compile Include="Output and tracking\FeedingInteractions.cs" />
+    <Compile Include="Output and tracking\GlobalNPPTracker.cs" />
+    <Compile Include="Output and tracking\GlobalProcessTracker.cs" />
+    <Compile Include="Output and tracking\GrowthTracker.cs" />
+    <Compile Include="Output and tracking\MetabolismTracker.cs" />
+    <Compile Include="Output and tracking\MortalityTracker.cs" />
+    <Compile Include="Output and tracking\OutputCell.cs" />
+    <Compile Include="Output and tracking\OutputGlobal.cs" />
+    <Compile Include="Output and tracking\OutputGrid.cs" />
+    <Compile Include="Output and tracking\OutputModelState.cs" />
+    <Compile Include="Output and tracking\PredationTracker.cs" />
+    <Compile Include="Output and tracking\ProcessTracker.cs" />
+    <Compile Include="Output and tracking\ReproductionTracker.cs" />
+    <Compile Include="Model structure\RunSimulations.cs" />
+    <Compile Include="Model structure\ScenarioParameterInitialisation.cs" />
+    <Compile Include="Output and tracking\TextualOutput.cs" />
+    <Compile Include="Model structure\Stock.cs" />
+    <Compile Include="Utility classes\ClimateVariablesCalculator.cs" />
+    <Compile Include="Utility classes\MassBinsHandler.cs" />
+    <Compile Include="Utility classes\NonStaticSimpleRNG.cs" />
+    <Compile Include="Model structure\ModelGrid.cs" />
+    <Compile Include="Utility classes\UtilityFunctions.cs" />
+    <Compile Include="Model structure\ViewGrid.cs" />
+    <Compile Include="Model structure\MadingleyModel.cs" />
+    <Compile Include="Model structure\EnviroData.cs" />
+    <Compile Include="Model structure\GridCell.cs" />
+    <Compile Include="Model structure\Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility classes\Stopwatch.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="input\Data\Original\LandSeaMask.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\Original\Land\AvailableWaterCapacity.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\Original\Land\HANPP.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\Original\Land\hanpp_2005.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\Original\Land\NPP.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\Original\Ocean\averaged_SST_50y_top100m_monthly.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\Original\Ocean\averaged_u_50y_top100m_monthly.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\Original\Ocean\averaged_v_50y_top100m_monthly.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\Original\Ocean\KennedyetalDTR_monthly_climatology.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\Original\Ocean\OceanNPP.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\Original\TropicalGrasslandsMask.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Ecological definition files\CohortFunctionalGroupDefinitions.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Ecological definition files\CohortFunctionalGroupDefinitionsDispersalOnly.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Ecological definition files\EcologicalParameters.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Ecological definition files\MassBinDefinitions.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Ecological definition files\StockFunctionalGroupDefinitions.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Environmental data layer list\EnvironmentalDataLayers.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\FileLocationParameters.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Initial model state setup\ReadModelState.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Initial model state setup\Scenarios.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\Initial model state setup\SpecificLocations.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\OutputControlParameters.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Model setup\SimulationControlParameters.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\ModelStates\ModelState_0.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\ModelStates\ModelState_1.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\ModelStates\ModelState_2.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\ModelStates\ModelState_3.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\ModelStates\ModelState_4.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\ModelStates\ModelState_5.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\ModelStates\ModelState_6.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\ModelStates\ModelState_7.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\ModelStates\ModelState_8.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\ModelStates\ModelState_9.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="stdole">
+      <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
