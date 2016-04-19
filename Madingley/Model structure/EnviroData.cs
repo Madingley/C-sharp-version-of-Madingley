@@ -1192,6 +1192,7 @@ namespace Madingley
         }
 
 
+
         /// <summary>
         /// Reads in two-dimensional environmental data from a NetCDF and stores them in the array of values within this instance of EnviroData
         /// </summary>
@@ -1367,6 +1368,7 @@ namespace Madingley
 
         }
 
+
         /// <summary>
         /// Reads in three-dimensional environmental data from a NetCDF and stores them in the array of values within this instance of EnviroData
         /// </summary>
@@ -1393,7 +1395,7 @@ namespace Madingley
 
             // Loop over possible names for the missing value metadata until a match is found in the NetCDF file
             int kk = 0;
-            while ((kk < SearchStrings.Length) & (!internalData.Variables[dataName].Metadata.ContainsKey(SearchStrings[kk]))) kk++;
+            while ((kk < SearchStrings.Length) && (!internalData.Variables[dataName].Metadata.ContainsKey(SearchStrings[kk]))) kk++;
 
             // If a match is found, then set the missing data field equal to the value in the file, otherwise throw an error
             if (kk < SearchStrings.Length)
@@ -1402,7 +1404,9 @@ namespace Madingley
             }
             else
             {
-                Debug.Fail("No missing data value found for environmental data file: " + internalData.Name.ToString());
+                //Debug.Fail("No missing data value found for environmental data file: " + internalData.Name.ToString());
+                Console.WriteLine("No missing data value found for this variable: assigning a value of -9999");
+                _MissingValue = -9999;
             }
 
             // Possible names for the latitude dimension in the NetCDF file
@@ -1448,7 +1452,7 @@ namespace Madingley
             }
 
             // Possible names for the monthly temporal dimension in the netCDF file
-            SearchStrings = new string[] { "month", "Month", "months", "Months" };
+            SearchStrings = new string[] { "time", "month", "Month", "months", "Months" };
             // Check which position the temporal dimension is in in the NetCDF file and add this to the vector of positions. If the temporal dimension cannot be
             // found then throw an error
             if (SearchStrings.Contains(internalData.Dimensions[0].Name.ToString()))
@@ -1538,6 +1542,10 @@ namespace Madingley
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                        }
                                     }
                                     // Add the final array to the class field for environmental data values
                                     _DataArray.Add(LatLongArraySorted);
@@ -1604,6 +1612,10 @@ namespace Madingley
                                                     LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
+                                        }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
                                         }
                                     }
                                     // Add the final array to the class field for environmental data values
@@ -1680,6 +1692,10 @@ namespace Madingley
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                        }
                                     }
                                     // Add the final array to the class field for environmental data values
                                     _DataArray.Add(LatLongArraySorted);
@@ -1746,6 +1762,10 @@ namespace Madingley
                                                     LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
+                                        }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
                                         }
                                     }
                                     // Add the final array to the class field for environmental data values
@@ -1822,6 +1842,10 @@ namespace Madingley
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                        }
                                     }
                                     // Add the final array to the class field for environmental data values
                                     _DataArray.Add(LatLongArraySorted);
@@ -1888,6 +1912,10 @@ namespace Madingley
                                                     LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
+                                        }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
                                         }
                                     }
                                     // Add the final array to the class field for environmental data values
@@ -1978,6 +2006,10 @@ namespace Madingley
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                        }
                                     }
                                     // Add the final array to the class field for environmental data values
                                     _DataArray.Add(LatLongArraySorted);
@@ -2044,6 +2076,10 @@ namespace Madingley
                                                     LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
+                                        }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
                                         }
                                     }
                                     // Add the final array to the class field for environmental data values
@@ -2120,6 +2156,10 @@ namespace Madingley
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                        }
                                     }
                                     // Add the final array to the class field for environmental data values
                                     _DataArray.Add(LatLongArraySorted);
@@ -2186,6 +2226,10 @@ namespace Madingley
                                                     LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
+                                        }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
                                         }
                                     }
                                     // Add the final array to the class field for environmental data values
@@ -2262,6 +2306,10 @@ namespace Madingley
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                        }
                                     }
                                     // Add the final array to the class field for environmental data values
                                     _DataArray.Add(LatLongArraySorted);
@@ -2328,6 +2376,10 @@ namespace Madingley
                                                     LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
+                                        }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
                                         }
                                     }
                                     // Add the final array to the class field for environmental data values
@@ -2417,6 +2469,10 @@ namespace Madingley
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                        }
                                     }
                                     // Add the final array to the class field for environmental data values
                                     _DataArray.Add(LatLongArraySorted);
@@ -2483,6 +2539,10 @@ namespace Madingley
                                                     LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
+                                        }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
                                         }
                                     }
                                     // Add the final array to the class field for environmental data values
@@ -2559,6 +2619,10 @@ namespace Madingley
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                        }
                                     }
                                     // Add the final array to the class field for environmental data values
                                     _DataArray.Add(LatLongArraySorted);
@@ -2625,6 +2689,10 @@ namespace Madingley
                                                     LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
+                                        }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
                                         }
                                     }
                                     // Add the final array to the class field for environmental data values
@@ -2701,6 +2769,10 @@ namespace Madingley
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                        }
                                     }
                                     // Add the final array to the class field for environmental data values
                                     _DataArray.Add(LatLongArraySorted);
@@ -2767,6 +2839,10 @@ namespace Madingley
                                                     LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
+                                        }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
                                         }
                                     }
                                     // Add the final array to the class field for environmental data values
@@ -2858,6 +2934,10 @@ namespace Madingley
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                        }
                                     }
                                     // Add the final array to the class field for environmental data values
                                     _DataArray.Add(LatLongArraySorted);
@@ -2924,6 +3004,10 @@ namespace Madingley
                                                     LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
+                                        }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
                                         }
                                     }
                                     // Add the final array to the class field for environmental data values
@@ -3000,6 +3084,10 @@ namespace Madingley
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                        }
                                     }
                                     // Add the final array to the class field for environmental data values
                                     _DataArray.Add(LatLongArraySorted);
@@ -3066,6 +3154,10 @@ namespace Madingley
                                                     LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
+                                        }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
                                         }
                                     }
                                     // Add the final array to the class field for environmental data values
@@ -3142,6 +3234,10 @@ namespace Madingley
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                        }
                                     }
                                     // Add the final array to the class field for environmental data values
                                     _DataArray.Add(LatLongArraySorted);
@@ -3209,6 +3305,10 @@ namespace Madingley
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                        }
                                     }
                                     // Add the final array to the class field for environmental data values
                                     _DataArray.Add(LatLongArraySorted);
@@ -3269,6 +3369,7 @@ namespace Madingley
             Debug.Assert(_LonStep > 0.0, "Longitudes are still inverted in an environmental variable stored in EnviroData");
 
         }
+
 
         /// <summary>
         /// Dispose of an Envirodata instance

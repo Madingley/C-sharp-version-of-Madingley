@@ -57,7 +57,7 @@ namespace Madingley
         private TextReader SyncStateReader;
 
 
-        public void InputModelState(string inputPath, string filename, ModelGrid ecosystemModelGrid, List<uint[]> cellList)
+        public InputModelState(string inputPath, string filename, ModelGrid ecosystemModelGrid, List<uint[]> cellList)
         {
 
             //Set the input state flag to be true
