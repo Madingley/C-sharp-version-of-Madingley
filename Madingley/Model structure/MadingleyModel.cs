@@ -852,8 +852,19 @@ namespace Madingley
 
             if (initialisation.InputState)
             {
-                InputModelState = new InputModelState(initialisation.ModelStatePath[simulation], 
-                    initialisation.ModelStateFilename[simulation],EcosystemModelGrid, _CellList);
+                InputModelState = new InputModelState();
+                switch(initialisation.ModelStateType[simulation])
+                {
+                    case "txt":
+                        InputModelState.InputModelStateTxt(initialisation.ModelStatePath[simulation],
+                            initialisation.ModelStateFilename[simulation], EcosystemModelGrid, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions, initialisation.TrackProcesses);
+                        break;
+                    case "ncdf":
+                        InputModelState.InputModelStateNCDF(initialisation.ModelStatePath[simulation],
+                            initialisation.ModelStateFilename[simulation], EcosystemModelGrid, _CellList, initialisation.TrackProcesses);
+                        break;
+                }
+
             }
 
             // When the last simulation for the current scenario

@@ -583,6 +583,14 @@ namespace Madingley
             set { _ModelStateFilename = value; }
         }
 
+
+        private List<string> _ModelStateType;
+
+        public List<string> ModelStateType
+        {
+            get { return _ModelStateType; }
+            set { _ModelStateType = value; }
+        }
         
         /// <summary>
         /// Reads the initalization file to get information for the set of simulations to be run
@@ -600,6 +608,7 @@ namespace Madingley
             // Initialize the lists for storing information about model states
             _ModelStatePath = new List<string>();
             _ModelStateFilename = new List<string>();
+            _ModelStateType = new List<string>();
 
             // Read the intialisation files and copy them to the output directory
             ReadAndCopyInitialisationFiles(simulationInitialisationFilename, definitionsFilename, outputsFilename, outputPath);
@@ -996,6 +1005,9 @@ namespace Madingley
                         break;
                     case "filename":
                         for (int ii = 0; ii < TempValues.Length; ii++) _ModelStateFilename.Add(TempValues.GetValue(ii).ToString());
+                        break;
+                    case "filetype":
+                        for (int ii = 0; ii < TempValues.Length; ii++) _ModelStateType.Add(TempValues.GetValue(ii).ToString());
                         break;
                 }
             }

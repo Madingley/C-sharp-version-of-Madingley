@@ -109,6 +109,11 @@ namespace Madingley
             throw new NotImplementedException();
         }
 
+        public void Add(int fg, Stock c)
+        {
+            this[fg].Add(c);
+        }
+
         /// <summary>
         /// NOT CURRENTLY USED
         /// </summary>
@@ -216,6 +221,8 @@ namespace Madingley
             position++;
             return (position < GridCellStocks.Length);
         }
+
+
 
         /// <summary>
         /// Move back to the first element in the vector of lists of stocks

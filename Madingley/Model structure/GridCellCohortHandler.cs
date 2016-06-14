@@ -131,6 +131,11 @@ namespace Madingley
             ((IList<List<Cohort>>)GridCellCohorts).Add(listOfCohorts);
         }
 
+        public void Add(int fg, Cohort c)
+        {
+            this[fg].Add(c);
+        }
+
         /// <summary>
         /// Currently not implemented
         /// </summary>

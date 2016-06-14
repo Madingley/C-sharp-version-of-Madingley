@@ -57,7 +57,7 @@ namespace Madingley
         private TextReader SyncStateReader;
 
 
-        public InputModelState(string inputPath, string filename, ModelGrid ecosystemModelGrid, List<uint[]> cellList)
+        public void InputModelStateNCDF(string inputPath, string filename, ModelGrid ecosystemModelGrid, List<uint[]> cellList, bool tracking)
         {
 
             //Set the input state flag to be true
@@ -282,7 +282,7 @@ namespace Madingley
                                 Convert.ToUInt16(CohortBirthTimeStep[(int)cellList[cell][0]][cellList[cell][1], fg, c]),
                                 CohortProportionTimeActive[(int)cellList[cell][0]][cellList[cell][1], fg, c], ref temp,
                                 CohortTrophicIndex[(int)cellList[cell][0]][cellList[cell][1], fg, c],
-                                false);
+                                tracking);
 
                             _GridCellCohorts[cellList[cell][0], cellList[cell][1]][fg].Add(TempCohort);
                         }
@@ -373,7 +373,8 @@ namespace Madingley
         }
 
 
-        public void InputModelStateTxt(string inputPath, string filename, ModelGrid ecosystemModelGrid, List<uint[]> cellList)
+        public void InputModelStateTxt(string inputPath, string filename, ModelGrid ecosystemModelGrid,
+            FunctionalGroupDefinitions cohortFunctionalGroupDefinitions, FunctionalGroupDefinitions stockFunctionalGroupDefinitions, bool tracking)
         {
             //Set the input state flag to be true
             _InputState = true;
@@ -382,21 +383,30 @@ namespace Madingley
 
             string l;
             
+
             StateReader = new StreamReader(inputPath + filename + ".txt");
             // Create a threadsafe textwriter to write outputs to the Maturity stream
             SyncStateReader = TextReader.Synchronized(StateReader);
             l = SyncStateReader.ReadLine();
             string[] header = l.Split(tab);
 
-            double latitude;
-            double longitude;
-            double fg;
-            double n;
-            double bm;
-            double j_bm;
-            double a_bm;
+            double Latitude;
+            double Longitude;
+            int Fg;
+            double N;
+            double Bm;
+            double J_bm;
+            double A_bm;
+            double TI;
+            double LogOptPreySize;
+            uint BirthTimestep;
+            double PropTimeActive;
+            uint MaturityTimestep;
+            double MaxBm;
 
-
+            int SFG;
+            double SIM;
+            double STM;
 
             uint lat_ind;
             uint lon_ind;
@@ -404,27 +414,60 @@ namespace Madingley
             _GridCellCohorts = new GridCellCohortHandler[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
             _GridCellStocks = new GridCellStockHandler[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
 
+            long cid = 0;
+
             while(StateReader.Peek() != -1)
             {
                 l = SyncStateReader.ReadLine();
                 string[] vals = l.Split(tab);
 
-                latitude = Convert.ToDouble(vals[1]);
-                longitude = Convert.ToDouble(vals[2]);
+                Latitude = Convert.ToDouble(vals[1]);
+                Longitude = Convert.ToDouble(vals[2]);
 
-                lat_ind = ecosystemModelGrid.GetLatIndex(latitude);
-                lon_ind = ecosystemModelGrid.GetLonIndex(longitude);
+                lat_ind = ecosystemModelGrid.GetLatIndex(Latitude);
+                lon_ind = ecosystemModelGrid.GetLonIndex(Longitude);
 
-                if (_GridCellCohorts[lat_ind, lon_ind] == null) _GridCellCohorts[lat_ind, lon_ind] = new GridCellCohortHandler();
-                if (_GridCellStocks[lat_ind, lon_ind] == null) _GridCellStocks[lat_ind, lon_ind] = new GridCellStockHandler();
+                if (_GridCellCohorts[lat_ind, lon_ind] == null) _GridCellCohorts[lat_ind, lon_ind] = new GridCellCohortHandler(cohortFunctionalGroupDefinitions.GetNumberOfFunctionalGroups());
+                if (_GridCellStocks[lat_ind, lon_ind] == null) _GridCellStocks[lat_ind, lon_ind] = new GridCellStockHandler(stockFunctionalGroupDefinitions.GetNumberOfFunctionalGroups());
 
                 if (vals[4].Contains("S")) //Check if this is a stock
                 {
+                    //Expects the file to have timestep, latitude, longitude, Cohort ID. So start reading the values at column index 4.
+                    int i = 4;
+                    SFG = Convert.ToInt32(vals[i].Trim(new Char[] { 'S' }));
+                    //Jump to the IndividualBodyMass column
+                    i = 7;
+                    SIM = Convert.ToDouble(vals[i++]);
+                    STM = Convert.ToDouble(vals[i++]);
                     
+                    Stock NewStock = new Stock((byte)SFG, SIM, STM);
+
+                    if (_GridCellStocks[lat_ind, lon_ind][SFG] == null) _GridCellStocks[lat_ind, lon_ind][SFG] = new List<Stock>();
+                    _GridCellStocks[lat_ind, lon_ind].Add(SFG, NewStock);
                 }
                 else // is a cohort
                 {
-                    
+                    //Expects the file to have timestep, latitude, longitude, Cohort ID. So start reading the values at column index 4.
+                    int i = 4;
+                    Fg = Convert.ToInt32(vals[i++]);
+                    J_bm = Convert.ToDouble(vals[i++]);
+                    A_bm = Convert.ToDouble(vals[i++]);
+                    Bm = Convert.ToDouble(vals[i++]);
+                    N = Convert.ToDouble(vals[i++]);
+                    BirthTimestep = Convert.ToUInt32(vals[i++]);
+                    MaturityTimestep = Convert.ToUInt32(vals[i++]);
+                    LogOptPreySize = Convert.ToDouble(vals[i++]);
+                    MaxBm = Convert.ToDouble(vals[i++]);
+                    TI = Convert.ToDouble(vals[i++]);
+                    PropTimeActive = Convert.ToDouble(vals[i++]);
+
+                    //Instantiate the list for this functional group
+
+                    if(_GridCellCohorts[lat_ind, lon_ind][Fg] == null) _GridCellCohorts[lat_ind, lon_ind][Fg] = new List<Cohort>();
+
+                    Cohort NewCohort = new Cohort((byte) Fg, J_bm, A_bm, Bm, N, LogOptPreySize,MaxBm, (ushort)BirthTimestep, (ushort)MaturityTimestep, PropTimeActive, ref cid, TI, tracking);
+                    _GridCellCohorts[lat_ind, lon_ind].Add(Fg, NewCohort);
+
                 }
 
                 
