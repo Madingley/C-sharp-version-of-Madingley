@@ -767,6 +767,15 @@ namespace Madingley
                                         _Times[hh] = (double)tempInt16Vector[hh];
                                     }
                                 }
+                                else if (internalData.Variables[MonthSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "string")
+                                {
+                                    // Convert the dimension data to double format and add to the vector of dimension values
+                                    _Times = new double[_NumTimes];
+                                    for (int hh = 0; hh < _NumTimes; hh++)
+                                    {
+                                        _Times[hh] = (double)hh;
+                                    }
+                                }
                                 else
                                 {
                                     // Data format unrecognized, so throw an error
