@@ -256,7 +256,7 @@ namespace Madingley
         /// <param name="DrawRandomly">Whether the model is set to use a random draw</param>
         /// <param name="specificLocations">Whether the model is to be run for specific locations</param>
         public ModelGrid(float minLat, float minLon,float maxLat,float maxLon,float latCellSize,float lonCellSize, 
-            SortedList<string,EnviroData> enviroStack, FunctionalGroupDefinitions cohortFunctionalGroups, FunctionalGroupDefinitions
+            SortedList<string,EnviroData> enviroStack,SortedList<string,EnviroDataTemporal> enviroStackTemporal , FunctionalGroupDefinitions cohortFunctionalGroups, FunctionalGroupDefinitions
             stockFunctionalGroups, SortedList<string, double> globalDiagnostics, Boolean tracking, Boolean DrawRandomly, 
             Boolean specificLocations)
         {
@@ -336,7 +336,7 @@ namespace Madingley
             {
                 for (int jj = 0; jj < _NumLonCells; jj+=GridCellRarefaction)
                 {
-                    InternalGrid[ii, jj] = new GridCell(_Lats[ii],(uint)ii, _Lons[jj],(uint)jj, LatCellSize, LonCellSize, enviroStack,
+                    InternalGrid[ii, jj] = new GridCell(_Lats[ii], (uint)ii, _Lons[jj], (uint)jj, LatCellSize, LonCellSize, enviroStack, enviroStackTemporal,
                         GlobalMissingValue, cohortFunctionalGroups, stockFunctionalGroups, globalDiagnostics, tracking, specificLocations);
                     CellsForDispersal[ii,jj] = new List<uint[]>();
                     CellsForDispersalDirection[ii, jj] = new List<uint>();
@@ -459,14 +459,14 @@ namespace Madingley
                 {
                     // Create the grid cell at the specified position
                     InternalGrid[cellList[ii][0], cellList[ii][1]] = new GridCell(_Lats[cellList[ii][0]], cellList[ii][0],
-                        _Lons[cellList[ii][1]], cellList[ii][1], latCellSize, lonCellSize, enviroStack, _GlobalMissingValue,
+                        _Lons[cellList[ii][1]], cellList[ii][1], latCellSize, lonCellSize, enviroStack, enviroStackTemporal, _GlobalMissingValue,
                         cohortFunctionalGroups, stockFunctionalGroups, globalDiagnostics, tracking, specificLocations);
 
                     //Initialise in CellEnvironment the layers that are temporally varying
-                    foreach (var item in enviroStackTemporal)
-	                {
-                        InternalGrid[cellList[ii][0], cellList[ii][1]].CellEnvironment.Add(item.Key, new double[1]);
-	                }
+                    //foreach (var item in enviroStackTemporal)
+                    //{
+                    //    InternalGrid[cellList[ii][0], cellList[ii][1]].CellEnvironment.Add(item.Key, new double[1]);
+                    //}
                     
 
                     if (!specificLocations)
@@ -493,15 +493,15 @@ namespace Madingley
                 {
                     // Create the grid cell at the specified position
                     InternalGrid[cellList[ii][0], cellList[ii][1]] = new GridCell(_Lats[cellList[ii][0]], cellList[ii][0],
-                        _Lons[cellList[ii][1]], cellList[ii][1], latCellSize, lonCellSize, enviroStack, _GlobalMissingValue,
+                        _Lons[cellList[ii][1]], cellList[ii][1], latCellSize, lonCellSize, enviroStack, enviroStackTemporal, _GlobalMissingValue,
                         cohortFunctionalGroups, stockFunctionalGroups, globalDiagnostics, tracking, specificLocations);
 
                     //Initialise in CellEnvironment the layers that are temporally varying
-                    foreach (var item in enviroStackTemporal)
-                    {
+                    //foreach (var item in enviroStackTemporal)
+                    //{
 
-                        InternalGrid[cellList[ii][0], cellList[ii][1]].CellEnvironment.Add(item.Key, new double[1]);
-                    }
+                    //    InternalGrid[cellList[ii][0], cellList[ii][1]].CellEnvironment.Add(item.Key, new double[1]);
+                    //}
                     if (!specificLocations)
                     {
                         CellsForDispersal[cellList[ii][0], cellList[ii][1]] = new List<uint[]>();
@@ -552,6 +552,13 @@ namespace Madingley
                 item.Value.GetTemporalEnvironmentListofCells(InternalGrid, cellList,item.Key,TimeElapsed,LatCellSize,LonCellSize);
             }
             InterpolateMissingValues();
+
+
+            foreach (var c in cellList)
+            {
+                InternalGrid[c[0], c[1]].RenameAndRecalculateEnvironmentalVariablesByRealm();
+            }
+
         }
 
         /// <summary>

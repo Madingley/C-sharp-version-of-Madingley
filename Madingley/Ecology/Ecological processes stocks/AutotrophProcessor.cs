@@ -80,6 +80,12 @@ namespace Madingley
                 // Check that the units of oceanic NPP are gC per m2 per day
                 Debug.Assert(oceanicNPPUnits == "gC/m2/day", "Oceanic NPP data are not in the correct units for this formulation of the model");
 
+                //If units are moles per meter squared per second then convert to gC m-2 d-1
+                if(oceanicNPPUnits == "mol C m-2 s-1")
+                {
+                    NPP *= 12 * 86400;
+                }
+
                 // Convert to g/cell/month
                 NPP *= _MsqToKmSqConversion;
 
