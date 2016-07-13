@@ -382,8 +382,8 @@ namespace Madingley
         /// <param name="tracking">Whether process tracking is enabled</param>
         /// <param name="specificLocations">Whether the model is to be run for specific locations</param>
         /// <param name="runInParallel">Whether model grid cells will be run in parallel</param>
-        public ModelGrid(float minLat, float minLon, float maxLat, float maxLon, float latCellSize, float lonCellSize, List<uint[]> cellList, 
-            SortedList<string, EnviroData> enviroStack, FunctionalGroupDefinitions cohortFunctionalGroups,
+        public ModelGrid(float minLat, float minLon, float maxLat, float maxLon, float latCellSize, float lonCellSize, List<uint[]> cellList,
+            SortedList<string, EnviroData> enviroStack, SortedList<string, EnviroDataTemporal> enviroStackTemporal, FunctionalGroupDefinitions cohortFunctionalGroups,
             FunctionalGroupDefinitions stockFunctionalGroups, SortedList<string, double> globalDiagnostics, Boolean tracking, 
             Boolean specificLocations, Boolean runInParallel)
         { 
@@ -451,6 +451,7 @@ namespace Madingley
 
             int NCells = cellList.Count;
 
+            
             if (!runInParallel)
             {
                 // Loop over cells to set up the model grid
@@ -460,6 +461,14 @@ namespace Madingley
                     InternalGrid[cellList[ii][0], cellList[ii][1]] = new GridCell(_Lats[cellList[ii][0]], cellList[ii][0],
                         _Lons[cellList[ii][1]], cellList[ii][1], latCellSize, lonCellSize, enviroStack, _GlobalMissingValue,
                         cohortFunctionalGroups, stockFunctionalGroups, globalDiagnostics, tracking, specificLocations);
+
+                    //Initialise in CellEnvironment the layers that are temporally varying
+                    foreach (var item in enviroStackTemporal)
+	                {
+                        InternalGrid[cellList[ii][0], cellList[ii][1]].CellEnvironment.Add(item.Key, new double[1]);
+	                }
+                    
+
                     if (!specificLocations)
                     {
                         CellsForDispersal[cellList[ii][0], cellList[ii][1]] = new List<uint[]>();
@@ -486,6 +495,13 @@ namespace Madingley
                     InternalGrid[cellList[ii][0], cellList[ii][1]] = new GridCell(_Lats[cellList[ii][0]], cellList[ii][0],
                         _Lons[cellList[ii][1]], cellList[ii][1], latCellSize, lonCellSize, enviroStack, _GlobalMissingValue,
                         cohortFunctionalGroups, stockFunctionalGroups, globalDiagnostics, tracking, specificLocations);
+
+                    //Initialise in CellEnvironment the layers that are temporally varying
+                    foreach (var item in enviroStackTemporal)
+                    {
+
+                        InternalGrid[cellList[ii][0], cellList[ii][1]].CellEnvironment.Add(item.Key, new double[1]);
+                    }
                     if (!specificLocations)
                     {
                         CellsForDispersal[cellList[ii][0], cellList[ii][1]] = new List<uint[]>();
@@ -500,8 +516,11 @@ namespace Madingley
             }
 
 
+            AssignGridCellTemporalData(enviroStackTemporal, cellList, 0);
+
             if (!specificLocations)
             {
+
                 InterpolateMissingValues();
 
 
@@ -522,6 +541,17 @@ namespace Madingley
 
             Console.WriteLine("\n");
 
+        }
+
+
+        public void AssignGridCellTemporalData(SortedList<string, EnviroDataTemporal> enviroStackTemporal, List<uint[]> cellList, uint TimeElapsed)
+        {
+            //Seed the grid cells with temporally varying environment
+            foreach (var item in enviroStackTemporal)
+            {
+                item.Value.GetTemporalEnvironmentListofCells(InternalGrid, cellList,item.Key,TimeElapsed,LatCellSize,LonCellSize);
+            }
+            InterpolateMissingValues();
         }
 
         /// <summary>
@@ -787,8 +817,11 @@ namespace Madingley
                         //Cohort[] tempGridCellCohorts = (Cohort[])inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Clone();
                         //Cohort[] tempGridCellCohorts = (Cohort[])Array.ConvertAll(inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray(),
                         //    element => (Cohort)element.Clone());
-                        Cohort[] tempGridCellCohorts = inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Select(cohort => new Cohort(cohort)).ToArray();
-                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellCohorts[fg] = tempGridCellCohorts.ToList();
+                        if (inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg] != null)
+                        {
+                            Cohort[] tempGridCellCohorts = inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Select(cohort => new Cohort(cohort)).ToArray();
+                            InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellCohorts[fg] = tempGridCellCohorts.ToList();
+                        }
                     }
                 }
                 else
@@ -799,8 +832,11 @@ namespace Madingley
                         //Cohort[] tempGridCellCohorts = (Cohort[])inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Clone(); 
                         //Cohort[] tempGridCellCohorts = (Cohort[])Array.ConvertAll(inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray(),
                         //     element => (Cohort)element.Clone());
-                        Cohort[] tempGridCellCohorts = inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Select(cohort => new Cohort(cohort)).ToArray();
-                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellCohorts[fg] = tempGridCellCohorts.ToList();
+                        if (inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg] != null)
+                        {
+                            Cohort[] tempGridCellCohorts = inputModelState.GridCellCohorts[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Select(cohort => new Cohort(cohort)).ToArray();
+                            InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellCohorts[fg] = tempGridCellCohorts.ToList();
+                        }
                     }
                 }
 
@@ -821,8 +857,11 @@ namespace Madingley
                         //Stock[] tempGridCellStocks = (Stock[])inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Clone();
                         //Stock[] tempGridCellStocks = (Stock[])Array.ConvertAll(inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray(),
                         //     element => (Stock)element.Clone());
-                        Stock[] tempGridCellStocks = inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Select(stock => new Stock(stock)).ToArray();
-                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellStocks[fg] = tempGridCellStocks.ToList();
+                        if (inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg] != null)
+                        {
+                            Stock[] tempGridCellStocks = inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Select(stock => new Stock(stock)).ToArray();
+                            InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellStocks[fg] = tempGridCellStocks.ToList();
+                        }
                     }
                 }
                 else
@@ -833,8 +872,11 @@ namespace Madingley
                         //Stock[] tempGridCellStocks = (Stock[])inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Clone();
                         //Stock[] tempGridCellStocks = (Stock[])Array.ConvertAll(inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray(),
                         //     element => (Stock)element.Clone());
-                        Stock[] tempGridCellStocks = inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Select(stock => new Stock(stock)).ToArray();
-                        InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellStocks[fg] = tempGridCellStocks.ToList();
+                        if (inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg] != null)
+                        {
+                            Stock[] tempGridCellStocks = inputModelState.GridCellStocks[cellIndexPair[0], cellIndexPair[1]][fg].ToArray().Select(stock => new Stock(stock)).ToArray();
+                            InternalGrid[cellIndexPair[0], cellIndexPair[1]].GridCellStocks[fg] = tempGridCellStocks.ToList();
+                        }
                     }
                 }
 

@@ -67,6 +67,11 @@ namespace Madingley
         private SortedList<string, EnviroData> EnviroStack = new SortedList<string, EnviroData>();
 
         /// <summary>
+        /// A list of environmental data layers that vary through time
+        /// </summary>
+        private SortedList<string, EnviroDataTemporal> EnviroStackTemporal = new SortedList<string, EnviroDataTemporal>();
+
+        /// <summary>
         /// An instance of ModelGrid to hold the grid to be used in this model
         /// </summary>
         private ModelGrid EcosystemModelGrid;
@@ -433,7 +438,13 @@ namespace Madingley
                  // Get current time step and month
                  CurrentTimeStep = hh;
                  CurrentMonth = Utilities.GetCurrentMonth(hh,_GlobalModelTimeStepUnit);
-                 
+
+
+                 if ((CurrentTimeStep % 12) == 0)
+                 {
+                     EcosystemModelGrid.AssignGridCellTemporalData(EnviroStackTemporal, _CellList, CurrentTimeStep);
+                 }
+
                  // Initialise cross grid cell ecology
                  MadingleyEcologyCrossGridCell.InitializeCrossGridCellEcology(_GlobalModelTimeStepUnit, DrawRandomly, initialisation);
 
@@ -670,6 +681,7 @@ namespace Madingley
             CohortFunctionalGroupDefinitions = initialisation.CohortFunctionalGroupDefinitions;
             StockFunctionalGroupDefinitions = initialisation.StockFunctionalGroupDefinitions;
             EnviroStack = initialisation.EnviroStack;
+            EnviroStackTemporal = initialisation.EnviroStackTemporal;
             _HumanNPPScenario = scenarioParameters.scenarioParameters.ElementAt(scenarioIndex).Item3["npp"];
             _TemperatureScenario = scenarioParameters.scenarioParameters.ElementAt(scenarioIndex).Item3["temperature"];
             _HarvestingScenario = scenarioParameters.scenarioParameters.ElementAt(scenarioIndex).Item3["harvesting"];
@@ -762,7 +774,7 @@ namespace Madingley
             {
                 // Set up the model grid using these locations
                 EcosystemModelGrid = new ModelGrid(BottomLatitude, LeftmostLongitude, TopLatitude, RightmostLongitude,
-                    CellSize, CellSize, _CellList, EnviroStack, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
+                    CellSize, CellSize, _CellList, EnviroStack, EnviroStackTemporal, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
                     GlobalDiagnosticVariables, initialisation.TrackProcesses, SpecificLocations,RunGridCellsInParallel);
 
             }
@@ -798,7 +810,7 @@ namespace Madingley
                 // Set up a full model grid (i.e. not for specific locations)
                 // Set up the model grid using these locations
                 EcosystemModelGrid = new ModelGrid(BottomLatitude, LeftmostLongitude, TopLatitude, RightmostLongitude,
-                    CellSize, CellSize, _CellList, EnviroStack, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
+                    CellSize, CellSize, _CellList, EnviroStack,EnviroStackTemporal, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions,
                     GlobalDiagnosticVariables, initialisation.TrackProcesses, SpecificLocations, RunGridCellsInParallel);
 
                 List<int> cellsToRemove = new List<int>();
@@ -840,8 +852,19 @@ namespace Madingley
 
             if (initialisation.InputState)
             {
-                InputModelState = new InputModelState(initialisation.ModelStatePath[simulation], 
-                    initialisation.ModelStateFilename[simulation],EcosystemModelGrid, _CellList);
+                InputModelState = new InputModelState();
+                switch(initialisation.ModelStateType[simulation])
+                {
+                    case "txt":
+                        InputModelState.InputModelStateTxt(initialisation.ModelStatePath[simulation],
+                            initialisation.ModelStateFilename[simulation], EcosystemModelGrid, CohortFunctionalGroupDefinitions, StockFunctionalGroupDefinitions, initialisation.TrackProcesses);
+                        break;
+                    case "ncdf":
+                        InputModelState.InputModelStateNCDF(initialisation.ModelStatePath[simulation],
+                            initialisation.ModelStateFilename[simulation], EcosystemModelGrid, _CellList, initialisation.TrackProcesses);
+                        break;
+                }
+
             }
 
             // When the last simulation for the current scenario

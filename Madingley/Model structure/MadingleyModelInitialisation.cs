@@ -364,6 +364,19 @@ namespace Madingley
             set { _EnviroStack = value; }
         }
 
+        /// <summary>
+        /// The environmental layers for use in the model
+        /// </summary>
+        private SortedList<string, EnviroDataTemporal> _EnviroStackTemporal = new SortedList<string, EnviroDataTemporal>();
+        /// <summary>
+        /// Get and set the environmental layers for use in the model
+        /// </summary>
+        public SortedList<string, EnviroDataTemporal> EnviroStackTemporal
+        {
+            get { return _EnviroStackTemporal; }
+            set { _EnviroStackTemporal = value; }
+        }
+
 
         /// <summary>
         /// The full path for the output files for a set of simulations
@@ -570,6 +583,14 @@ namespace Madingley
             set { _ModelStateFilename = value; }
         }
 
+
+        private List<string> _ModelStateType;
+
+        public List<string> ModelStateType
+        {
+            get { return _ModelStateType; }
+            set { _ModelStateType = value; }
+        }
         
         /// <summary>
         /// Reads the initalization file to get information for the set of simulations to be run
@@ -587,6 +608,7 @@ namespace Madingley
             // Initialize the lists for storing information about model states
             _ModelStatePath = new List<string>();
             _ModelStateFilename = new List<string>();
+            _ModelStateType = new List<string>();
 
             // Read the intialisation files and copy them to the output directory
             ReadAndCopyInitialisationFiles(simulationInitialisationFilename, definitionsFilename, outputsFilename, outputPath);
@@ -984,6 +1006,9 @@ namespace Madingley
                     case "filename":
                         for (int ii = 0; ii < TempValues.Length; ii++) _ModelStateFilename.Add(TempValues.GetValue(ii).ToString());
                         break;
+                    case "filetype":
+                        for (int ii = 0; ii < TempValues.Length; ii++) _ModelStateType.Add(TempValues.GetValue(ii).ToString());
+                        break;
                 }
             }
 
@@ -1182,12 +1207,7 @@ namespace Madingley
             for (int ii = 0; ii < Filenames.Count(); ii++)
             {
                 Console.Write("\r{0} Variable {1} of {2}: {3}\n", Sources[ii], ii + 1, Filenames.Count, Filenames[ii]);
-                // If the layers are not static, then suffix the file name with '1' - not currently implemented
-                if (StaticLayer[ii].ToLower().Equals("n"))
-                {
-                    Debug.Fail("This option is currently not supported");
-                    Filenames[ii] = Filenames[ii] + "1";
-                }
+                
                 if (Sources[ii].ToLower().Equals("local"))
                 {
                     // For layers where the file format is ESRI ASCII grid, the dataset name is the same as the file name
@@ -1206,7 +1226,14 @@ namespace Madingley
                     }
                     Filenames[ii] = TempFilename + Extensions[ii];
                     // Read in and store the environmental data
-                    EnviroStack.Add(LayerName[ii], new EnviroData(Filenames[ii], DatasetNames[ii], FileTypes[ii], Resolutions[ii], MethodUnits[ii]));
+                    if (StaticLayer[ii] == "Y")
+                    {
+                        EnviroStack.Add(LayerName[ii], new EnviroData(Filenames[ii], DatasetNames[ii], FileTypes[ii], Resolutions[ii], MethodUnits[ii]));
+                    }
+                    else
+                    {
+                        EnviroStackTemporal.Add(LayerName[ii], new EnviroDataTemporal(Filenames[ii], DatasetNames[ii], FileTypes[ii], Resolutions[ii], MethodUnits[ii]));
+                    }
                 }
                 else if (Sources[ii].ToLower().Equals("fetchclimate"))
                 {

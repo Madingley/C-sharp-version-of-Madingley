@@ -217,6 +217,7 @@
     <Compile Include="Model structure\EcologyCrossGridCell.cs" />
     <Compile Include="Model structure\EcologyCohort.cs" />
     <Compile Include="Model structure\EcologyStock.cs" />
+    <Compile Include="Model structure\EnviroDataTemporal.cs" />
     <Compile Include="Model structure\GridCellCohortHandler.cs" />
     <Compile Include="Model structure\ArraySDSConvert.cs" />
     <Compile Include="Model structure\Cohort.cs" />
@@ -271,6 +272,9 @@
     <None Include="input\Data\Original\Land\AvailableWaterCapacity.nc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="input\Data\Original\Land\cru20.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="input\Data\Original\Land\HANPP.nc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -287,6 +291,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="input\Data\Original\Ocean\averaged_v_50y_top100m_monthly.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\Original\Ocean\bob.nc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="input\Data\Original\Ocean\KennedyetalDTR_monthly_climatology.nc">

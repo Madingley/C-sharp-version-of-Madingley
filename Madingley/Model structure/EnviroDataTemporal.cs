@@ -13,17 +13,10 @@ using System.IO;
 
 namespace Madingley
 {
-    /// <summary>
-    /// Imports environmental data from ASCII and NetCDF files
-    /// </summary>
-    /// <todoT>No error-trapping as yet</todoT>
-    /// <todoT>Rewrite to use the ArraySDSConvert class</todoT>
-    /// <todoD>Need  to go through code and rewrite e.g. change method to overloaded to prevent passing variable name and file name for ESRI grids</todoD>
-    /// <remarks>Currently assumes that cells are evenly spaced in latitude and longitude</remarks>
-    public class EnviroData
+    public class EnviroDataTemporal
     {
-        /// <summary>
-        /// Number of latitudinal cells
+
+                /// Number of latitudinal cells
         /// </summary>
         private uint _NumLats;
         /// <summary>
@@ -96,15 +89,6 @@ namespace Madingley
         public double LonStep { get { return _LonStep; } }
 
         /// <summary>
-        /// List of arrays of values of the environmental variable
-        /// </summary>
-        private List<double[,]> _DataArray;
-        /// <summary>
-        /// Get list of arrays of values of the environmental variable
-        /// </summary>
-        public List<double[,]> DataArray { get { return _DataArray; } }
-
-        /// <summary>
         /// Vector of latitudes of the bottom edges of grid cells
         /// </summary>
         private double[] _Lats;
@@ -164,273 +148,14 @@ namespace Madingley
         /// </summary>
         private UtilityFunctions Utilities;
 
-        /// <summary>
-        /// Overloaded constructor to fetch climate information from the cloud using FetchClimate
-        /// </summary>
-        /// <param name="dataName">Name of the the climate variable to be fetched</param>
-        /// <param name="dataResolution">Time resolution requested</param>
-        /// <param name="latMin">Bottom latitude</param>
-        /// <param name="lonMin">Leftmost longitude</param>
-        /// <param name="latMax">Maximum latitude</param>
-        /// <param name="lonMax">Maximum longitude</param>
-        /// <param name="cellSize">Size of each grid cell</param>
-        /// <param name="FetchClimateDataSource">Data source from which to fetch environmental data</param>
-        public EnviroData(string dataName, string dataResolution, double latMin, double lonMin, double latMax, double lonMax, double cellSize,
-            EnvironmentalDataSource FetchClimateDataSource)
-        {
-            Console.WriteLine("Fetching environmental data for: " + dataName + " with resolution " + dataResolution);
+        DataSet _InternalData;
 
-            // Initialise the utility functions
-            Utilities = new UtilityFunctions();
+        string _DataName;
 
-            _NumLats = Convert.ToUInt32((latMax - latMin) / cellSize);
-            _NumLons = Convert.ToUInt32((lonMax - lonMin) / cellSize);
-            _LatMin = latMin;
-            _LonMin = lonMin;
+        bool LatInverted;
+        bool LongInverted;
 
-            _Lats = new double[_NumLats];
-            _Lons = new double[_NumLons];
-
-            for (int ii = 0; ii < _NumLats; ii++)
-            {
-                _Lats[ii] = Math.Round(_LatMin + (ii * cellSize), 2);
-            }
-            for (int jj = 0; jj < _NumLons; jj++)
-            {
-                _Lons[jj] = Math.Round(_LonMin + (jj * cellSize), 2);
-            }
-
-            _LatStep = Math.Round(Lats[1] - _Lats[0], 2);
-            _LonStep = Math.Round(Lons[1] - Lons[0], 2);
-
-            //Declare a dataset to perform the fetch
-            var ds = DataSet.Open("msds:memory2");
-            //Add lat and lon information to the dataset
-            ds.AddAxisCells("Latitude", "degrees", _LatMin, latMax + cellSize, cellSize); //copying Latitude and Longitude variables into new dataset            
-            ds.AddAxisCells("Longitude", "degrees", _LonMin, lonMax + cellSize, cellSize);
-
-            //Add the required time dimension to the dataset
-            switch (dataResolution)
-            {
-                case "year":
-                    ds.AddClimatologyAxisYearly(yearmin: 1961, yearmax: 1990, yearStep: 30);
-                    break;
-                case "month":
-                    ds.AddClimatologyAxisMonthly();
-                    break;
-                default:
-                    break;
-            }
-
-            double[, ,] temp = null;
-            _DataArray = new List<double[,]>();
-
-            //Fetch for the required data
-            switch (dataName.ToLower())
-            {
-                case "land_dtr":
-                    ds.Fetch(ClimateParameter.FC_LAND_DIURNAL_TEMPERATURE_RANGE, "landdtr", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
-                    //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                    temp = (double[, ,])ds.Variables["landdtr"].GetData();
-                    _MissingValue = (double)ds.Variables["landdtr"].GetMissingValue();
-                    break;
-                case "temperature":
-                    ds.Fetch(ClimateParameter.FC_TEMPERATURE, "airt", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
-                    //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                    temp = (double[, ,])ds.Variables["airt"].GetData();
-                    _MissingValue = (double)ds.Variables["airt"].GetMissingValue();
-                    break;
-                // Commenting out ocean air temperature because it is running too slow when using FetchClimate
-                case "temperature_ocean":
-                    ds.Fetch(ClimateParameter.FC_OCEAN_AIR_TEMPERATURE, "oceanairt", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
-                    //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                    temp = (double[, ,])ds.Variables["oceanairt"].GetData();
-                    _MissingValue = (double)ds.Variables["oceanairt"].GetMissingValue();
-                    break;
-                case "precipitation":
-                    ds.Fetch(ClimateParameter.FC_PRECIPITATION, "precip", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
-                    //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                    temp = (double[, ,])ds.Variables["precip"].GetData();
-                    _MissingValue = (double)ds.Variables["precip"].GetMissingValue();
-                    break;
-                case "frost":
-                    ds.Fetch(ClimateParameter.FC_LAND_FROST_DAY_FREQUENCY, "frost", dataSource: FetchClimateDataSource);
-                    temp = (double[, ,])ds.Variables["frost"].GetData();
-                    _MissingValue = (double)ds.Variables["frost"].GetMissingValue();
-                    break;
-                default:
-                    Debug.Fail("No Enviro data read in for " + dataName);
-                    break;
-            }
-
-            _NumTimes = (uint)ds.Dimensions["time"].Length;
-
-            //Add the fetched data to the Envirodata array
-            for (int tt = 0; tt < _NumTimes; tt++)
-            {
-                double[,] TempArray = new double[_NumLats, _NumLons];
-                for (int ii = 0; ii < _NumLats; ii++)
-                {
-                    for (int jj = 0; jj < _NumLons; jj++)
-                    {
-                        // Currently FetchClimate returns longitudes as the last array dimension
-                        TempArray[ii, jj] = temp[tt, ii, jj];
-                    }
-                }
-                _DataArray.Add(TempArray);
-            }
-
-            //DataSet Out = ds.Clone("output/" + dataName + ".nc");
-            //Out.Dispose();
-            ds.Dispose();
-
-        }
-
-
-
-        /// <summary>
-        /// Overloaded constructor to fetch climate information from the cloud using FetchClimate for specific locations
-        /// </summary>
-        /// <param name="dataName">Name of the the climate variable to be fetched</param>
-        /// <param name="dataResolution">Time resolution requested</param>
-        /// <param name="latMin">Bottom latitude</param>
-        /// <param name="lonMin">Leftmost longitude</param>
-        /// <param name="latMax">Maximum latitude</param>
-        /// <param name="lonMax">Maximum longitude</param>
-        /// <param name="cellSize">Size of each grid cell</param>
-        /// <param name = "cellList">List of cells to be fetched</param>
-        /// <param name="FetchClimateDataSource">Data source from which to fetch environmental data</param>
-        public EnviroData(string dataName, string dataResolution, double latMin, double lonMin, double latMax, double lonMax, double cellSize,
-            List<uint[]> cellList,
-            EnvironmentalDataSource FetchClimateDataSource)
-        {
-            Console.WriteLine("Fetching environmental data for: " + dataName + " with resolution " + dataResolution);
-
-            // Initialise the utility functions
-            Utilities = new UtilityFunctions();
-
-            _NumLats = Convert.ToUInt32((latMax - latMin) / cellSize);
-            _NumLons = Convert.ToUInt32((lonMax - lonMin) / cellSize);
-            _LatMin = latMin;
-            _LonMin = lonMin;
-
-            _Lats = new double[_NumLats];
-            _Lons = new double[_NumLons];
-
-            for (int ii = 0; ii < _NumLats; ii++)
-            {
-                _Lats[ii] = Math.Round(_LatMin + (ii * cellSize), 2);
-            }
-            for (int jj = 0; jj < _NumLons; jj++)
-            {
-                _Lons[jj] = Math.Round(_LonMin + (jj * cellSize), 2);
-            }
-
-            _LatStep = Math.Round(Lats[1] - _Lats[0], 2);
-            _LonStep = Math.Round(Lons[1] - Lons[0], 2);
-
-            //Declare a dataset to perform the fetch
-            var ds = DataSet.Open("msds:memory2");
-
-            _DataArray = new List<double[,]>();
-
-            //Add the required time dimension to the dataset
-            switch (dataResolution)
-            {
-                case "year":
-                    ds.AddClimatologyAxisYearly(yearmin: 1961, yearmax: 1990, yearStep: 30);
-                    break;
-                case "month":
-                    ds.AddClimatologyAxisMonthly();
-                    break;
-                default:
-                    break;
-            }
-
-            //Add lat and lon information to the dataset
-            for (int ii = 0; ii < cellList.Count; ii++)
-            {
-                ds.AddAxisCells("longitude", "degrees_east", _Lons[cellList[ii][1]], Lons[cellList[ii][1]] + cellSize, cellSize);
-                ds.AddAxisCells("latitude", "degrees_north", _Lats[cellList[ii][0]], _Lats[cellList[ii][0]] + cellSize, cellSize);
-
-                double[, ,] temp = null;
-
-
-                //Fetch for the required data
-                switch (dataName.ToLower())
-                {
-                    case "land_dtr":
-                        ds.Fetch(ClimateParameter.FC_LAND_DIURNAL_TEMPERATURE_RANGE, "landdtr", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
-                        //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                        temp = (double[, ,])ds.Variables["landdtr"].GetData();
-                        _MissingValue = (double)ds.Variables["landdtr"].GetMissingValue();
-                        break;
-                    case "temperature":
-                        ds.Fetch(ClimateParameter.FC_TEMPERATURE, "airt", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
-                        //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                        temp = (double[, ,])ds.Variables["airt"].GetData();
-                        _MissingValue = (double)ds.Variables["airt"].GetMissingValue();
-                        break;
-                    // Commenting out ocean air temperature because it is running too slow when using FetchClimate
-                    case "temperature_ocean":
-                        ds.Fetch(ClimateParameter.FC_OCEAN_AIR_TEMPERATURE, "oceanairt", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
-                        //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                        temp = (double[, ,])ds.Variables["oceanairt"].GetData();
-                        _MissingValue = (double)ds.Variables["oceanairt"].GetMissingValue();
-                        break;
-                    case "precipitation":
-                        ds.Fetch(ClimateParameter.FC_PRECIPITATION, "precip", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
-                        //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                        temp = (double[, ,])ds.Variables["precip"].GetData();
-                        _MissingValue = (double)ds.Variables["precip"].GetMissingValue();
-                        break;
-                    case "frost":
-                        ds.Fetch(ClimateParameter.FC_LAND_FROST_DAY_FREQUENCY, "frost", dataSource: FetchClimateDataSource);
-                        temp = (double[, ,])ds.Variables["frost"].GetData();
-                        _MissingValue = (double)ds.Variables["frost"].GetMissingValue();
-                        break;
-                    default:
-                        Debug.Fail("No Enviro data read in for " + dataName);
-                        break;
-                }
-
-                _NumTimes = (uint)ds.Dimensions["time"].Length;
-
-                //Add the fetched data to the Envirodata array
-                for (int tt = 0; tt < _NumTimes; tt++)
-                {
-                    double[,] TempArray;
-                    if (_DataArray.Count > tt)
-                    {
-                        TempArray = _DataArray[tt];
-                    }
-                    else
-                    {
-                        TempArray = new double[NumLats, NumLons];
-                    }
-
-                    // Currently FetchClimate returns longitudes as the last array dimension
-                    TempArray[cellList[ii][0], cellList[ii][1]] = temp[tt, 0, 0];
-
-                    if (_DataArray.Count > tt)
-                    {
-                        _DataArray.RemoveAt(tt);
-                        _DataArray.Insert(tt, TempArray);
-                    }
-                    else
-                    {
-                        _DataArray.Add(TempArray);
-                    }
-
-                }
-            }
-
-            //DataSet Out = ds.Clone("output/" + dataName + ".nc");
-            //Out.Dispose();
-            ds.Dispose();
-
-        }
-
+        string _DataResolution;
 
         /// <summary>
         /// Constructor for EnviroData
@@ -443,13 +168,10 @@ namespace Madingley
         /// <todo>Check whether lat/lon or 0/1 are fixed for all NetCDFs</todo>
         /// <todo>CHECK IF DIMENSIONS HAVE TO BE THE SAME FOR ALL VARIABLES IN A NETCDF AND HOW TO EXTRACT DIMENSIONS FOR A SINGLE VARIABLE IF NECESSARY</todo>
         /// <todo>Write code to check for equal cell sizes in NetCDFs</todo>
-        public EnviroData(string fileName, string dataName, string dataType, string dataResolution, string units)
+        public EnviroDataTemporal(string fileName, string dataName, string dataType, string dataResolution, string units)
         {
             // Initialise the utility functions
             Utilities = new UtilityFunctions();
-
-            // Temporary array to hold environmental data
-            double[,] tempDoubleArray;
 
             // Temporary vectors to hold dimension data
             Single[] tempSingleVector;
@@ -464,172 +186,167 @@ namespace Madingley
             //Integer counter for iterating through search strings
             int kk = 0;
 
-            // Intialise the list of arrays to hold the values of the environmental data
-            _DataArray = new List<double[,]>();
-
             // Construct the string required to access the file using Scientific Dataset
             _ReadFileString = "msds:" + dataType + "?file=" + fileName + "&openMode=readOnly";
 
             // Open the data file using Scientific Dataset
-            DataSet internalData = DataSet.Open(_ReadFileString);
+            _InternalData = DataSet.Open(_ReadFileString);
+
+            _DataName = dataName;
 
             // Store the specified units
             _Units = units;
 
+            _DataResolution = dataResolution;
+
             // Switch based on the tempeoral resolution and data type
             switch (dataResolution)
             {
-                case "year":
-                    switch (dataType)
-                    {
-                        case "esriasciigrid":
-                            // Extract the number of latidudinal and longitudinal cells in the file
-                            _NumLats = (uint)internalData.Dimensions["x"].Length;
-                            _NumLons = (uint)internalData.Dimensions["y"].Length;
-                            // Set number of time intervals equal to 1
-                            _NumTimes = 1;
-                            // Initialise the vector of time steps with length 1
-                            _Times = new double[1];
-                            // Assign the single value of the time step dimension to be equal to 1
-                            _Times[0] = 1;
-                            // Get the value used for missing data in this environmental variable
-                            _MissingValue = internalData.GetAttr<double>(1, "NODATA_value");
-                            // Get the latitudinal and longitudinal sizes of grid cells
-                            _LatStep = internalData.GetAttr<double>(1, "cellsize");
-                            _LonStep = _LatStep;
-                            // Get longitudinal 'x' and latitudinal 'y' corners of the bottom left of the data grid
-                            _LatMin = internalData.GetAttr<double>(1, "yllcorner");
-                            _LonMin = internalData.GetAttr<double>(1, "xllcorner");
-                            // Create vectors holding the latitudes and longitudes of the bottom-left corners of the grid cells
-                            _Lats = new double[NumLats];
-                            for (int ii = 0; ii < NumLats; ii++)
-                            {
-                                _Lats[NumLats - 1 - ii] = LatMin + ii * _LatStep;
-                            }
-                            _Lons = new double[NumLons];
-                            for (int ii = 0; ii < NumLons; ii++)
-                            {
-                                _Lons[ii] = LonMin + ii * _LonStep;
-                            }
-                            //Fill in the two-dimensional environmental data array
-                            // Note: currently assumes  Lats (x), Lons (y) in SDS - this is different to ESRI ASCII
-                            tempDoubleArray = new double[NumLats, NumLons];
-                            tempDoubleArray = internalData.GetData<double[,]>(dataName);
-                            _DataArray.Add(tempDoubleArray);
-                            break;
-                        case "nc":
-                            // Loop over possible names for the latitude dimension until a match in the data file is found
-                            kk = 0;
-                            while ((kk < LatSearchStrings.Length) && (!internalData.Variables.Contains(LatSearchStrings[kk]))) kk++;
+                //case "year":
+                //    switch (dataType)
+                //    {
+                //        case "esriasciigrid":
+                //            // Extract the number of latidudinal and longitudinal cells in the file
+                //            _NumLats = (uint)_InternalData.Dimensions["x"].Length;
+                //            _NumLons = (uint)_InternalData.Dimensions["y"].Length;
+                //            // Set number of time intervals equal to 1
+                //            _NumTimes = 1;
+                //            // Initialise the vector of time steps with length 1
+                //            _Times = new double[1];
+                //            // Assign the single value of the time step dimension to be equal to 1
+                //            _Times[0] = 1;
+                //            // Get the value used for missing data in this environmental variable
+                //            _MissingValue = _InternalData.GetAttr<double>(1, "NODATA_value");
+                //            // Get the latitudinal and longitudinal sizes of grid cells
+                //            _LatStep = _InternalData.GetAttr<double>(1, "cellsize");
+                //            _LonStep = _LatStep;
+                //            // Get longitudinal 'x' and latitudinal 'y' corners of the bottom left of the data grid
+                //            _LatMin = _InternalData.GetAttr<double>(1, "yllcorner");
+                //            _LonMin = _InternalData.GetAttr<double>(1, "xllcorner");
+                //            // Create vectors holding the latitudes and longitudes of the bottom-left corners of the grid cells
+                //            _Lats = new double[NumLats];
+                //            for (int ii = 0; ii < NumLats; ii++)
+                //            {
+                //                _Lats[NumLats - 1 - ii] = LatMin + ii * _LatStep;
+                //            }
+                //            _Lons = new double[NumLons];
+                //            for (int ii = 0; ii < NumLons; ii++)
+                //            {
+                //                _Lons[ii] = LonMin + ii * _LonStep;
+                //            }
+                //            break;
+                //        case "nc":
+                //            // Loop over possible names for the latitude dimension until a match in the data file is found
+                //            kk = 0;
+                //            while ((kk < LatSearchStrings.Length) && (!_InternalData.Variables.Contains(LatSearchStrings[kk]))) kk++;
 
-                            // If a match for the latitude dimension has been found then read in the data, otherwise throw an error
-                            if (kk < LatSearchStrings.Length)
-                            {
-                                // Get number of latitudinal cells in the file
-                                _NumLats = (uint)internalData.Dimensions[LatSearchStrings[kk]].Length;
-                                // Read in the values of the latitude dimension from the file
-                                // Check which format the latitude dimension data are in; if unrecognized, then throw an error
-                                if (internalData.Variables[LatSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "single")
-                                {
-                                    // Read the latitude dimension data to a temporary vector
-                                    tempSingleVector = internalData.GetData<Single[]>(LatSearchStrings[kk]);
-                                    // Convert the dimension data to double format and add to the vector of dimension values
-                                    _Lats = new double[tempSingleVector.Length];
-                                    for (int jj = 0; jj < tempSingleVector.Length; jj++)
-                                    {
-                                        _Lats[jj] = (double)tempSingleVector[jj];
-                                    }
-                                }
-                                else if (internalData.Variables[LatSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "double")
-                                {
-                                    // Read the dimension data directly into the vector of dimension values
-                                    _Lats = internalData.GetData<double[]>(LatSearchStrings[kk]);
-                                }
-                                else
-                                {
-                                    // Data format unrecognized, so throw an error
-                                    Debug.Fail("Unrecognized data format for latitude dimension");
-                                }
-                            }
-                            else
-                            {
-                                // Didn't find a plausible match for latitude dimension data, so throw an error
-                                Debug.Fail("Cannot find any variables that look like latitude dimensions");
-                            }
+                //            // If a match for the latitude dimension has been found then read in the data, otherwise throw an error
+                //            if (kk < LatSearchStrings.Length)
+                //            {
+                //                // Get number of latitudinal cells in the file
+                //                _NumLats = (uint)_InternalData.Dimensions[LatSearchStrings[kk]].Length;
+                //                // Read in the values of the latitude dimension from the file
+                //                // Check which format the latitude dimension data are in; if unrecognized, then throw an error
+                //                if (_InternalData.Variables[LatSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "single")
+                //                {
+                //                    // Read the latitude dimension data to a temporary vector
+                //                    tempSingleVector = _InternalData.GetData<Single[]>(LatSearchStrings[kk]);
+                //                    // Convert the dimension data to double format and add to the vector of dimension values
+                //                    _Lats = new double[tempSingleVector.Length];
+                //                    for (int jj = 0; jj < tempSingleVector.Length; jj++)
+                //                    {
+                //                        _Lats[jj] = (double)tempSingleVector[jj];
+                //                    }
+                //                }
+                //                else if (_InternalData.Variables[LatSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "double")
+                //                {
+                //                    // Read the dimension data directly into the vector of dimension values
+                //                    _Lats = _InternalData.GetData<double[]>(LatSearchStrings[kk]);
+                //                }
+                //                else
+                //                {
+                //                    // Data format unrecognized, so throw an error
+                //                    Debug.Fail("Unrecognized data format for latitude dimension");
+                //                }
+                //            }
+                //            else
+                //            {
+                //                // Didn't find a plausible match for latitude dimension data, so throw an error
+                //                Debug.Fail("Cannot find any variables that look like latitude dimensions");
+                //            }
 
-                            // Loop over possible names for the latitude dimension until a match in the data file is found
-                            kk = 0;
-                            while ((kk < LonSearchStrings.Length) && (!internalData.Variables.Contains(LonSearchStrings[kk]))) kk++;
+                //            // Loop over possible names for the latitude dimension until a match in the data file is found
+                //            kk = 0;
+                //            while ((kk < LonSearchStrings.Length) && (!_InternalData.Variables.Contains(LonSearchStrings[kk]))) kk++;
 
-                            // If a match for the longitude dimension has been found then read in the data, otherwise throw an error
-                            if (kk < LonSearchStrings.Length)
-                            {
-                                // Get number of longitudinal cells in the file
-                                _NumLons = (uint)internalData.Dimensions[LonSearchStrings[kk]].Length;
-                                // Read in the values of the longitude dimension from the file
-                                // Check which format the longitude dimension data are in; if unrecognized, then throw an error
-                                if (internalData.Variables[LonSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "single")
-                                {
-                                    // Read the longitude dimension data to a temporary vector
-                                    tempSingleVector = internalData.GetData<Single[]>(LonSearchStrings[kk]);
-                                    // Convert the dimension data to double format and add to the vector of dimension values
-                                    _Lons = new double[tempSingleVector.Length];
-                                    for (int jj = 0; jj < tempSingleVector.Length; jj++)
-                                    {
-                                        _Lons[jj] = (double)tempSingleVector[jj];
-                                    }
-                                }
-                                else if (internalData.Variables[LonSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "double")
-                                {
-                                    // Read the dimension data directly into the vector of dimension values
-                                    _Lons = internalData.GetData<double[]>(LonSearchStrings[kk]);
-                                }
-                                else
-                                {
-                                    // Data format unrecognized, so throw an error
-                                    Debug.Fail("Unrecognized data format for longitude dimension");
-                                }
-                            }
-                            else
-                            {
-                                // Didn't find a plausible match for longitude dimension data, so throw an error
-                                Debug.Fail("Cannot find any variables that look like longitude dimensions");
-                            }
-                            // Set number of time intervals equal to 1
-                            _NumTimes = 1;
-                            // Initialise the vector of time steps with length 1
-                            _Times = new double[1];
-                            // Assign the single value of the time step dimension to be equal to 1
-                            _Times[0] = 1;
-                            // Get the latitudinal and longitudinal sizes of grid cells
-                            _LatStep = (_Lats[1] - _Lats[0]);
-                            _LonStep = (_Lons[1] - _Lons[0]);
-                            // Convert vectors of latitude and longutiude dimension data from cell-centre references to bottom-left references
-                            //if LatStep is positive then subtract the step to convert to the bottom  left corner of the cell,
-                            // else if LatStep is negative, then need to add the step to convert to the bottom left
-                            for (int ii = 0; ii < _Lats.Length; ii++)
-                            {
-                                _Lats[ii] = (_LatStep.CompareTo(0.0) > 0) ? _Lats[ii] - (_LatStep / 2) : _Lats[ii] + (_LatStep / 2);
-                            }
-                            for (int jj = 0; jj < _Lons.Length; jj++)
-                            {
-                                _Lons[jj] = (_LonStep.CompareTo(0.0) > 0) ? _Lons[jj] - (_LonStep / 2) : _Lons[jj] + (_LonStep / 2);
-                            }
-                            // Check whether latitudes and longitudes are inverted in the NetCDF file
-                            bool LatInverted = (_Lats[1] < _Lats[0]);
-                            bool LongInverted = (_Lons[1] < _Lons[0]);
-                            // Run method to read in the environmental data and the dimension data from the NetCDF
-                            EnvironmentListFromNetCDF(internalData, dataName, LatInverted, LongInverted);
-                            // Get longitudinal 'x' and latitudinal 'y' corners of the bottom left of the data grid
-                            _LatMin = _Lats[0];
-                            _LonMin = _Lons[0];
-                            break;
-                        default:
-                            // Data type not recognized, so throw an error
-                            Debug.Fail("Data type not supported");
-                            break;
-                    }
-                    break;
+                //            // If a match for the longitude dimension has been found then read in the data, otherwise throw an error
+                //            if (kk < LonSearchStrings.Length)
+                //            {
+                //                // Get number of longitudinal cells in the file
+                //                _NumLons = (uint)_InternalData.Dimensions[LonSearchStrings[kk]].Length;
+                //                // Read in the values of the longitude dimension from the file
+                //                // Check which format the longitude dimension data are in; if unrecognized, then throw an error
+                //                if (_InternalData.Variables[LonSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "single")
+                //                {
+                //                    // Read the longitude dimension data to a temporary vector
+                //                    tempSingleVector = _InternalData.GetData<Single[]>(LonSearchStrings[kk]);
+                //                    // Convert the dimension data to double format and add to the vector of dimension values
+                //                    _Lons = new double[tempSingleVector.Length];
+                //                    for (int jj = 0; jj < tempSingleVector.Length; jj++)
+                //                    {
+                //                        _Lons[jj] = (double)tempSingleVector[jj];
+                //                    }
+                //                }
+                //                else if (_InternalData.Variables[LonSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "double")
+                //                {
+                //                    // Read the dimension data directly into the vector of dimension values
+                //                    _Lons = _InternalData.GetData<double[]>(LonSearchStrings[kk]);
+                //                }
+                //                else
+                //                {
+                //                    // Data format unrecognized, so throw an error
+                //                    Debug.Fail("Unrecognized data format for longitude dimension");
+                //                }
+                //            }
+                //            else
+                //            {
+                //                // Didn't find a plausible match for longitude dimension data, so throw an error
+                //                Debug.Fail("Cannot find any variables that look like longitude dimensions");
+                //            }
+                //            // Set number of time intervals equal to 1
+                //            _NumTimes = 1;
+                //            // Initialise the vector of time steps with length 1
+                //            _Times = new double[1];
+                //            // Assign the single value of the time step dimension to be equal to 1
+                //            _Times[0] = 1;
+                //            // Get the latitudinal and longitudinal sizes of grid cells
+                //            _LatStep = (_Lats[1] - _Lats[0]);
+                //            _LonStep = (_Lons[1] - _Lons[0]);
+                //            // Convert vectors of latitude and longutiude dimension data from cell-centre references to bottom-left references
+                //            //if LatStep is positive then subtract the step to convert to the bottom  left corner of the cell,
+                //            // else if LatStep is negative, then need to add the step to convert to the bottom left
+                //            for (int ii = 0; ii < _Lats.Length; ii++)
+                //            {
+                //                _Lats[ii] = (_LatStep.CompareTo(0.0) > 0) ? _Lats[ii] - (_LatStep / 2) : _Lats[ii] + (_LatStep / 2);
+                //            }
+                //            for (int jj = 0; jj < _Lons.Length; jj++)
+                //            {
+                //                _Lons[jj] = (_LonStep.CompareTo(0.0) > 0) ? _Lons[jj] - (_LonStep / 2) : _Lons[jj] + (_LonStep / 2);
+                //            }
+                //            // Check whether latitudes and longitudes are inverted in the NetCDF file
+                //            LatInverted = (_Lats[1] < _Lats[0]);
+                //            LongInverted = (_Lons[1] < _Lons[0]);
+                            
+                //            // Get longitudinal 'x' and latitudinal 'y' corners of the bottom left of the data grid
+                //            _LatMin = _Lats[0];
+                //            _LonMin = _Lons[0];
+                //            break;
+                //        default:
+                //            // Data type not recognized, so throw an error
+                //            Debug.Fail("Data type not supported");
+                //            break;
+                //    }
+                //    break;
                 case "month":
                     switch (dataType)
                     {
@@ -640,19 +357,19 @@ namespace Madingley
                         case "nc":
                             // Loop over possible names for the latitude dimension until a match in the data file is found
                             kk = 0;
-                            while ((kk < LatSearchStrings.Length) && (!internalData.Variables.Contains(LatSearchStrings[kk]))) kk++;
+                            while ((kk < LatSearchStrings.Length) && (!_InternalData.Variables.Contains(LatSearchStrings[kk]))) kk++;
 
                             // If a match for the latitude dimension has been found then read in the data, otherwise throw an error
                             if (kk < LatSearchStrings.Length)
                             {
                                 // Get number of latitudinal cells in the file
-                                _NumLats = (uint)internalData.Dimensions[LatSearchStrings[kk]].Length;
+                                _NumLats = (uint)_InternalData.Dimensions[LatSearchStrings[kk]].Length;
                                 // Read in the values of the latitude dimension from the file
                                 // Check which format the latitude dimension data are in; if unrecognized, then throw an error
-                                if (internalData.Variables[LatSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "single")
+                                if (_InternalData.Variables[LatSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "single")
                                 {
                                     // Read the latitude dimension data to a temporary vector
-                                    tempSingleVector = internalData.GetData<Single[]>(LatSearchStrings[kk]);
+                                    tempSingleVector = _InternalData.GetData<Single[]>(LatSearchStrings[kk]);
                                     // Convert the dimension data to double format and add to the vector of dimension values
                                     _Lats = new double[tempSingleVector.Length];
                                     for (int jj = 0; jj < tempSingleVector.Length; jj++)
@@ -660,10 +377,10 @@ namespace Madingley
                                         _Lats[jj] = (double)tempSingleVector[jj];
                                     }
                                 }
-                                else if (internalData.Variables[LatSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "double")
+                                else if (_InternalData.Variables[LatSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "double")
                                 {
                                     // Read the dimension data directly into the vector of dimension values
-                                    _Lats = internalData.GetData<double[]>(LatSearchStrings[kk]);
+                                    _Lats = _InternalData.GetData<double[]>(LatSearchStrings[kk]);
                                 }
                                 else
                                 {
@@ -679,19 +396,19 @@ namespace Madingley
 
                             // Loop over possible names for the latitude dimension until a match in the data file is found
                             kk = 0;
-                            while ((kk < LonSearchStrings.Length) && (!internalData.Variables.Contains(LonSearchStrings[kk]))) kk++;
+                            while ((kk < LonSearchStrings.Length) && (!_InternalData.Variables.Contains(LonSearchStrings[kk]))) kk++;
 
                             // If a match for the longitude dimension has been found then read in the data, otherwise throw an error
                             if (kk < LonSearchStrings.Length)
                             {
                                 // Get number of longitudinal cells in the file
-                                _NumLons = (uint)internalData.Dimensions[LonSearchStrings[kk]].Length;
+                                _NumLons = (uint)_InternalData.Dimensions[LonSearchStrings[kk]].Length;
                                 // Read in the values of the longitude dimension from the file
                                 // Check which format the longitude dimension data are in; if unrecognized, then throw an error
-                                if (internalData.Variables[LonSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "single")
+                                if (_InternalData.Variables[LonSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "single")
                                 {
                                     // Read the longitude dimension data to a temporary vector
-                                    tempSingleVector = internalData.GetData<Single[]>(LonSearchStrings[kk]);
+                                    tempSingleVector = _InternalData.GetData<Single[]>(LonSearchStrings[kk]);
                                     // Convert the dimension data to double format and add to the vector of dimension values
                                     _Lons = new double[tempSingleVector.Length];
                                     for (int jj = 0; jj < tempSingleVector.Length; jj++)
@@ -699,10 +416,10 @@ namespace Madingley
                                         _Lons[jj] = (double)tempSingleVector[jj];
                                     }
                                 }
-                                else if (internalData.Variables[LonSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "double")
+                                else if (_InternalData.Variables[LonSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "double")
                                 {
                                     // Read the dimension data directly into the vector of dimension values
-                                    _Lons = internalData.GetData<double[]>(LonSearchStrings[kk]);
+                                    _Lons = _InternalData.GetData<double[]>(LonSearchStrings[kk]);
                                 }
                                 else
                                 {
@@ -718,21 +435,20 @@ namespace Madingley
 
                             // Loop over possible names for the monthly temporal dimension until a match in the data file is found
                             kk = 0;
-                            while ((kk < MonthSearchStrings.Length) && (!internalData.Variables.Contains(MonthSearchStrings[kk]))) kk++;
+                            while ((kk < MonthSearchStrings.Length) && (!_InternalData.Variables.Contains(MonthSearchStrings[kk]))) kk++;
 
                             // Of a match for the monthly temporal dimension has been found then read in the data, otherwise thrown an error
-                            if (internalData.Variables.Contains(MonthSearchStrings[kk]))
+                            if (_InternalData.Variables.Contains(MonthSearchStrings[kk]))
                             {
                                 // Get the number of months in the temporal dimension
-                                _NumTimes = (uint)internalData.Dimensions[MonthSearchStrings[kk]].Length;
-                                // Check that the number of months is 12
-                                Debug.Assert(_NumTimes == 12, "Number of time intervals in an environmental data file with specified monthly temporal resolution is not equal to 12");
+                                _NumTimes = (uint)_InternalData.Dimensions[MonthSearchStrings[kk]].Length;
+                                
                                 // Read in the values of the temporal dimension from the file
                                 // Check which format the temporal dimension data are in; if unrecognized, then throw an error
-                                if (internalData.Variables[MonthSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "single")
+                                if (_InternalData.Variables[MonthSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "single")
                                 {
                                     // Read the temporal dimension data to a temporary vector
-                                    tempSingleVector = internalData.GetData<Single[]>(MonthSearchStrings[kk]);
+                                    tempSingleVector = _InternalData.GetData<Single[]>(MonthSearchStrings[kk]);
                                     // Convert the dimension data to double format and add to the vector of dimension values
                                     _Times = new double[_NumTimes];
                                     for (int hh = 0; hh < tempSingleVector.Length; hh++)
@@ -740,15 +456,15 @@ namespace Madingley
                                         _Times[hh] = (double)tempSingleVector[hh];
                                     }
                                 }
-                                else if (internalData.Variables[MonthSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "double")
+                                else if (_InternalData.Variables[MonthSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "double")
                                 {
                                     // Read the dimension data directly into the vector of dimension values
-                                    _Times = internalData.GetData<double[]>(MonthSearchStrings[kk]);
+                                    _Times = _InternalData.GetData<double[]>(MonthSearchStrings[kk]);
                                 }
-                                else if (internalData.Variables[MonthSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "int32")
+                                else if (_InternalData.Variables[MonthSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "int32")
                                 {
                                     // Read the temporal dimension data to a temporary vector
-                                    tempInt32Vector = internalData.GetData<Int32[]>(MonthSearchStrings[kk]);
+                                    tempInt32Vector = _InternalData.GetData<Int32[]>(MonthSearchStrings[kk]);
                                     // Convert the dimension data to double format and add to the vector of dimension values
                                     _Times = new double[_NumTimes];
                                     for (int hh = 0; hh < tempInt32Vector.Length; hh++)
@@ -756,24 +472,15 @@ namespace Madingley
                                         _Times[hh] = (double)tempInt32Vector[hh];
                                     }
                                 }
-                                else if (internalData.Variables[MonthSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "int16")
+                                else if (_InternalData.Variables[MonthSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "int16")
                                 {
                                     // Read the temporal dimension data to a temporary vector
-                                    tempInt16Vector = internalData.GetData<Int16[]>(MonthSearchStrings[kk]);
+                                    tempInt16Vector = _InternalData.GetData<Int16[]>(MonthSearchStrings[kk]);
                                     // Convert the dimension data to double format and add to the vector of dimension values
                                     _Times = new double[_NumTimes];
                                     for (int hh = 0; hh < tempInt16Vector.Length; hh++)
                                     {
                                         _Times[hh] = (double)tempInt16Vector[hh];
-                                    }
-                                }
-                                else if (internalData.Variables[MonthSearchStrings[kk]].TypeOfData.Name.ToString().ToLower() == "string")
-                                {
-                                    // Convert the dimension data to double format and add to the vector of dimension values
-                                    _Times = new double[_NumTimes];
-                                    for (int hh = 0; hh < _NumTimes; hh++)
-                                    {
-                                        _Times[hh] = (double)hh;
                                     }
                                 }
                                 else
@@ -806,10 +513,9 @@ namespace Madingley
                                 _Lons[jj] = _Lons[jj] - (_LonStep / 2);
                             }
                             // Check whether latitudes and longitudes are inverted in the NetCDF file
-                            bool LatInverted = (_Lats[1] < _Lats[0]);
-                            bool LongInverted = (_Lons[1] < _Lons[0]);
-                            // Run method to read in the environmental data and the dimension data from the NetCDF
-                            EnvironmentListFromNetCDF3D(internalData, dataName, LatInverted, LongInverted);
+                            LatInverted = (_Lats[1] < _Lats[0]);
+                            LongInverted = (_Lons[1] < _Lons[0]);
+                           
                             // Get longitudinal 'x' and latitudinal 'y' corners of the bottom left of the data grid
                             _LatMin = _Lats[0];
                             _LonMin = _Lons[0];
@@ -838,9 +544,45 @@ namespace Madingley
             // Update the variable keeping track of the number of environmental data layers
             _NumEnviroLayers = _NumEnviroLayers + 1;
 
-            //Close the environmental data file
-            internalData.Dispose();
         }
+
+
+        /// <summary>
+        /// Reads in one year's worth of data from the file and copies the values to the grid cell environment
+        /// </summary>
+        /// <param name="gridCells"></param>
+        /// <param name="cellList"></param>
+        /// <param name="internalLayerName"></param>
+        /// <param name="TimestepElapsed"></param>
+        /// <param name="LatCellSize"></param>
+        /// <param name="LonCellSize"></param>
+        public void GetTemporalEnvironmentListofCells(GridCell[,] gridCells, List<uint[]> cellList, string internalLayerName, uint TimestepElapsed,
+            float LatCellSize, float LonCellSize)
+        {
+
+            double[,,] DataArray  = EnvironmentListFromNetCDF3D((int)TimestepElapsed);
+            bool data_missing;
+
+            foreach (var c in cellList)
+            {
+                double[] TempData = new double[12];
+                for (uint i = TimestepElapsed; i < TimestepElapsed+12; i++)
+			    {
+                    data_missing = false;
+			    
+                    TempData[i-TimestepElapsed] = GetValue(DataArray,gridCells[c[0],c[1]].CellEnvironment["Latitude"][0],
+                    gridCells[c[0],c[1]].CellEnvironment["Longitude"][0],i-TimestepElapsed,out data_missing,
+                    (double)LatCellSize,(double)LonCellSize);
+                    if (data_missing) TempData[i] = _MissingValue;
+			    }
+
+                gridCells[c[0], c[1]].CellEnvironment[internalLayerName] = TempData;
+            }
+             
+
+        }
+
+
 
         /// <summary>
         /// A method to extract the area weighted value of an environmental variable from the envirodata cells overlapped by the cell specified by lat and lon
@@ -852,7 +594,7 @@ namespace Madingley
         /// <param name="latCellSize">The latitudinal size of cells in the model grid</param>
         /// <param name="lonCellSize">The longitudinal size of cells in the model grid</param>
         /// <returns>The area weighted value of an environmental variable from the envirodata cells overlapped by the cell specified by lat and lon</returns>
-        public double GetValue(double lat, double lon, uint timeInterval, out Boolean missingValue, double latCellSize, double lonCellSize)
+        private double GetValue(double[,,] dataArray, double lat, double lon, uint timeInterval, out Boolean missingValue, double latCellSize, double lonCellSize)
         {
             // Check that the requested latitude and longitude are within the scope of the environmental variable
             Debug.Assert(lat >= LatMin && lat < LatMin + (NumLats * LatStep), "Requested latitude is outside dataset latitude range: " + _ReadFileString);
@@ -1085,7 +827,7 @@ namespace Madingley
 
                         //Given the lat and lon extents of the overlapping region of this grid cell then calculate the area of this grid cell that is overlapped
                         OverlapAreas[ii - ClosestLowerLatIndex, jj - closestLeftmostLonIndex] = Utilities.CalculateGridCellArea(CellBottomLatOverlap, OverlapLonSize, OverlapLatSize);
-                        if (_DataArray[(int)timeInterval][ii, jj].CompareTo(_MissingValue) != 0.0)
+                        if (dataArray[ii, jj,(int)timeInterval].CompareTo(_MissingValue) != 0.0)
                             CumulativeNonMissingValueOverlapArea += OverlapAreas[ii - ClosestLowerLatIndex, jj - closestLeftmostLonIndex];
                     }
                 }
@@ -1144,7 +886,7 @@ namespace Madingley
 
                         //Given the lat and lon extents of the overlapping region of this grid cell then calculate the area of this grid cell that is overlapped
                         OverlapAreas[ClosestLowerLatIndex - ii, jj - closestLeftmostLonIndex] = Utilities.CalculateGridCellArea(CellBottomLatOverlap, OverlapLonSize, OverlapLatSize);
-                        if (_DataArray[(int)timeInterval][ii, jj].CompareTo(_MissingValue) != 0.0)
+                        if (dataArray[ii, jj,(int)timeInterval].CompareTo(_MissingValue) != 0.0)
                             CumulativeNonMissingValueOverlapArea += OverlapAreas[ClosestLowerLatIndex - ii, jj - closestLeftmostLonIndex];
                     }
                 }
@@ -1166,9 +908,9 @@ namespace Madingley
                     {
                         for (int jj = closestLeftmostLonIndex; jj <= closestRightmostLonIndex; jj++)
                         {
-                            if (_DataArray[(int)timeInterval][ii, jj].CompareTo(_MissingValue) != 0)
+                            if (dataArray[ii, jj,(int)timeInterval].CompareTo(_MissingValue) != 0)
                             {
-                                WeightedValue += _DataArray[(int)timeInterval][ii, jj] * OverlapAreas[ii - ClosestLowerLatIndex, jj - closestLeftmostLonIndex] / CumulativeNonMissingValueOverlapArea;
+                                WeightedValue += dataArray[ii, jj,(int)timeInterval] * OverlapAreas[ii - ClosestLowerLatIndex, jj - closestLeftmostLonIndex] / CumulativeNonMissingValueOverlapArea;
                             }
                         }
                     }
@@ -1187,9 +929,9 @@ namespace Madingley
                     {
                         for (int jj = closestLeftmostLonIndex; jj <= closestRightmostLonIndex; jj++)
                         {
-                            if (_DataArray[(int)timeInterval][ii, jj].CompareTo(_MissingValue) != 0)
+                            if (dataArray[ii, jj,(int)timeInterval].CompareTo(_MissingValue) != 0)
                             {
-                                WeightedValue += _DataArray[(int)timeInterval][ii, jj] * OverlapAreas[ClosestLowerLatIndex - ii, jj - closestLeftmostLonIndex] / CumulativeNonMissingValueOverlapArea;
+                                WeightedValue += dataArray[ii, jj,(int)timeInterval] * OverlapAreas[ClosestLowerLatIndex - ii, jj - closestLeftmostLonIndex] / CumulativeNonMissingValueOverlapArea;
                             }
                         }
                     }
@@ -1201,192 +943,30 @@ namespace Madingley
         }
 
 
-
-        /// <summary>
-        /// Reads in two-dimensional environmental data from a NetCDF and stores them in the array of values within this instance of EnviroData
-        /// </summary>
-        /// <param name="internalData">The SDS object to get data from</param>
-        /// <param name="dataName">The name of the variable within the NetCDF file</param>
-        /// <param name="latInverted">Whether the latitude values are inverted in the NetCDF file (i.e. large to small values)</param>
-        /// <param name="longInverted">Whether the longitude values are inverted in the NetCDF file (i.e. large to small values)</param>
-        private void EnvironmentListFromNetCDF(DataSet internalData, string dataName, bool latInverted, bool longInverted)
-        {
-            // Vector two hold the position in the dimensions of the NetCDF file of the latitude and longitude dimensions
-            int[] positions = new int[2];
-
-            // Array to store environmental data with latitude as the first dimension and longitude as the second dimension
-            double[,] LatLongArrayUnsorted = new double[_NumLats, _NumLons];
-            // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-            double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
-            Console.WriteLine(dataName);
-            // Check that the requested variable exists in the NetCDF file
-            Debug.Assert(internalData.Variables.Contains(dataName), "Requested variable does not exist in the specified file");
-
-            // Check that the environmental variable in the NetCDF file has two dimensions
-            Debug.Assert(internalData.Variables[dataName].Dimensions.Count == 2, "The specified variable in the NetCDF file does not have two dimensions, which is the required number for this method");
-
-            // Possible names for the missing value metadata in the NetCDF file
-            string[] SearchStrings = { "missing_value", "MissingValue" };
-
-            // Loop over possible names for the missing value metadata until a match is found in the NetCDF file
-            int kk = 0;
-            while ((kk < SearchStrings.Length) && (!internalData.Variables[dataName].Metadata.ContainsKey(SearchStrings[kk]))) kk++;
-
-            // If a match is found, then set the missing data field equal to the value in the file, otherwise throw an error
-            if (kk < SearchStrings.Length)
-            {
-                _MissingValue = Convert.ToDouble(internalData.Variables[dataName].Metadata[SearchStrings[kk]]);
-            }
-            else
-            {
-                Console.WriteLine("No missing data value found for this variable: assigning a value of -9999");
-                _MissingValue = -9999;
-            }
-
-            // Possible names for the latitude dimension in the NetCDF file
-            SearchStrings = new string[] { "lat", "Lat", "latitude", "Latitude", "lats", "Lats", "latitudes", "Latitudes", "y", "Y" };
-            // Check which position the latitude dimension is in in the NetCDF file and add this to the vector of positions. If the latitude dimension cannot be
-            // found then throw an error
-            if (SearchStrings.Contains(internalData.Dimensions[0].Name.ToString()))
-            {
-                positions[0] = 1;
-            }
-            else if (SearchStrings.Contains(internalData.Dimensions[1].Name.ToString()))
-            {
-                positions[1] = 1;
-            }
-            else
-            {
-                Debug.Fail("Cannot find a latitude dimension");
-            }
-
-            // Possible names for the longitude dimension in the netCDF file
-            SearchStrings = new string[] { "lon", "Lon", "longitude", "Longitude", "lons", "Lons", "long", "Long", "longs", "Longs", "longitudes", "Longitudes", "x", "X" };
-            // Check which position the latitude dimension is in in the NetCDF file and add this to the vector of positions. If the latitude dimension cannot be
-            // found then throw an error
-            if (SearchStrings.Contains(internalData.Dimensions[0].Name.ToString()))
-            {
-                positions[0] = 2;
-            }
-            else if (SearchStrings.Contains(internalData.Dimensions[1].Name.ToString()))
-            {
-                positions[1] = 2;
-            }
-            else
-            {
-                Debug.Fail("Cannot find a longitude dimension");
-            }
-
-            // Check the format of the specified environmental variable
-            if (internalData.Variables[dataName].TypeOfData.Name.ToString().ToLower() == "single")
-            {
-                // Read the environmental data into a temporary array
-                Single[,] TempArray;
-                TempArray = internalData.GetData<Single[,]>(dataName);
-                // Convert the data to double format and add to the unsorted array of values, transposing the data to be dimensioned by latitude first and longitude second
-                for (int ii = 0; ii < _NumLats; ii++)
-                {
-                    for (int jj = 0; jj < _NumLons; jj++)
-                    {
-                        LatLongArrayUnsorted[ii, jj] = TempArray[(int)(ii * Convert.ToDouble(positions[0] == 1) + jj * Convert.ToDouble(positions[0] == 2)),
-                            (int)(ii * Convert.ToDouble(positions[1] == 1) + jj * Convert.ToDouble(positions[1] == 2))];
-                    }
-                }
-            }
-            else if (internalData.Variables[dataName].TypeOfData.Name.ToString().ToLower() == "double")
-            {
-                // Read the environmental data into a temporary array
-                double[,] TempArray;
-                TempArray = internalData.GetData<double[,]>(dataName);
-                // Add the data to the unsorted array of values, transposing the data to be dimensioned by latitude first and longitude second
-                for (int ii = 0; ii < _NumLats; ii++)
-                {
-                    for (int jj = 0; jj < _NumLons; jj++)
-                    {
-                        LatLongArrayUnsorted[ii, jj] = TempArray[(int)(ii * Convert.ToDouble(positions[0] == 1) + jj * Convert.ToDouble(positions[0] == 2)), (int)(ii * Convert.ToDouble(positions[1] == 1) + jj * Convert.ToDouble(positions[1] == 2))];
-                    }
-                }
-            }
-            else if (internalData.Variables[dataName].TypeOfData.Name.ToString().ToLower() == "int32")
-            {
-                // Read the environmental data into a temporary array
-                Int32[,] TempArray;
-                TempArray = internalData.GetData<Int32[,]>(dataName);
-                // Convert the data to double format and add to the unsorted array of values, transposing the data to be dimensioned by latitude first and longitude second
-                for (int ii = 0; ii < _NumLats; ii++)
-                {
-                    for (int jj = 0; jj < _NumLons; jj++)
-                    {
-                        LatLongArrayUnsorted[ii, jj] = TempArray[(int)(ii * Convert.ToDouble(positions[0] == 1) + jj * Convert.ToDouble(positions[0] == 2)), (int)(ii * Convert.ToDouble(positions[1] == 1) + jj * Convert.ToDouble(positions[1] == 2))];
-                    }
-                }
-            }
-            else
-            {
-                // Format of environmental data not recognized so throw an error
-                Debug.Fail("Environmental data are in an unrecognized format");
-            }
-
-            // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-            for (int ii = 0; ii < _NumLats; ii++)
-            {
-                for (int jj = 0; jj < _NumLons; jj++)
-                {
-                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[(int)((1 - Convert.ToDouble(latInverted)) * ii + (Convert.ToDouble(latInverted) * (LatLongArrayUnsorted.GetLength(0) - 1 - ii))), (int)((1 - Convert.ToDouble(longInverted)) * jj + (Convert.ToDouble(longInverted) * (LatLongArrayUnsorted.GetLength(1) - 1 - jj)))];
-                }
-            }
-            // Add the final array to the class field for environmental data values
-            _DataArray.Add(LatLongArraySorted);
-
-            // If either latitude or longitude were inverted, then reverse their values in the class fields
-            if (latInverted)
-            {
-                // Temporary vector to store inverted latitude values
-                double[] tempLats = new double[_NumLats];
-                // Loop over latitude values
-                for (int ii = 0; ii < _NumLats; ii++)
-                {
-                    // Invert the values in the temporary vector
-                    tempLats[ii] = _Lats[_Lats.Length - 1 - ii];
-                }
-                // Overwrite the old vector of latitude values with the inverted values
-                _Lats = tempLats;
-                // Reverse the sign on the difference in latitude values between adjacent cells
-                _LatStep = -_LatStep;
-            }
-            if (longInverted)
-            {
-                // Temporary vector to store inverted longitude values
-                double[] tempLongs = new double[_NumLons];
-                // Loop over longitude values
-                for (int jj = 0; jj < _NumLons; jj++)
-                {
-                    // Invert the values in the temporary vector
-                    tempLongs[jj] = _Lons[_Lons.Length - 1 - jj];
-                }
-                // Overwrite the old vector of longitude values with the inverted values
-                _Lons = tempLongs;
-                // Reverse the sign on the difference in longitude values between adjacent cells
-                _LonStep = -_LonStep;
-            }
-
-            // Check that the increment in both latitudes and longitudes between consecutive grid cells is now positive
-            Debug.Assert(_LatStep > 0.0, "Latitudes are still inverted in an environmental variable stored in EnviroData");
-            Debug.Assert(_LonStep > 0.0, "Longitudes are still inverted in an environmental variable stored in EnviroData");
-
-        }
-
-
         /// <summary>
         /// Reads in three-dimensional environmental data from a NetCDF and stores them in the array of values within this instance of EnviroData
+        /// NEED TO MAKE THIS WORK FOR TEMPORAL RESOLUTIONS DIFFERENT FROM MONTH!!
         /// </summary>
-        /// <param name="internalData">The SDS object to get data from</param>
+        /// <param name="_InternalData">The SDS object to get data from</param>
         /// <param name="dataName">The name of the variable within the NetCDF file</param>
-        /// <param name="latInverted">Whether the latitude values are inverted in the NetCDF file (i.e. large to small values)</param>
-        /// <param name="longInverted">Whether the longitude values are inverted in the NetCDF file (i.e. large to small values)</param>
-        private void EnvironmentListFromNetCDF3D(DataSet internalData, string dataName, bool latInverted, bool longInverted)
+        /// <param name="LatInverted">Whether the latitude values are inverted in the NetCDF file (i.e. large to small values)</param>
+        /// <param name="LongInverted">Whether the longitude values are inverted in the NetCDF file (i.e. large to small values)</param>
+        private double[,,] EnvironmentListFromNetCDF3D(int timestep_elapsed)
         {
+            
+            // Array to store environmental data from netcdf, but with data in ascending order of both latitude and longitude
+            int number_time_steps_per_year = 12;
+            switch(_DataResolution)
+            {
+                case "year":
+                    number_time_steps_per_year = 1;
+                    break;
+                case "month":
+                    number_time_steps_per_year = 12;
+                    break;
+            }
+            double[,,] LatLongArraySorted = new double[_NumLats, _NumLons,number_time_steps_per_year];
+
             // Vector to hold the position in the dimensions of the NetCDF file of the latitude, longitude and third dimensions
             int[] positions = new int[3];
 
@@ -1394,43 +974,41 @@ namespace Madingley
             double[,] LatLongArrayUnsorted = new double[_NumLats, _NumLons];
 
             // Check that the requested variable exists in the NetCDF file
-            Debug.Assert(internalData.Variables.Contains(dataName), "Requested variable does not exist in the specified file");
+            Debug.Assert(_InternalData.Variables.Contains(_DataName), "Requested variable does not exist in the specified file");
 
             // Check that the environmental variable in the NetCDF file has three dimensions
-            Debug.Assert(internalData.Variables[dataName].Dimensions.Count == 3, "The specified variable in the NetCDF file does not have three dimensions, which is the required number for this method");
+            Debug.Assert(_InternalData.Variables[_DataName].Dimensions.Count == 3, "The specified variable in the NetCDF file does not have three dimensions, which is the required number for this method");
 
             // Possible names for the missing value metadata in the NetCDF file
-            string[] SearchStrings = { "missing_value", "MissingValue" };
+            string[] SearchStrings = { "missing_value", "MissingValue", "_FillValue" };
 
             // Loop over possible names for the missing value metadata until a match is found in the NetCDF file
             int kk = 0;
-            while ((kk < SearchStrings.Length) && (!internalData.Variables[dataName].Metadata.ContainsKey(SearchStrings[kk]))) kk++;
+            while ((kk < SearchStrings.Length) & (!_InternalData.Variables[_DataName].Metadata.ContainsKey(SearchStrings[kk]))) kk++;
 
             // If a match is found, then set the missing data field equal to the value in the file, otherwise throw an error
             if (kk < SearchStrings.Length)
             {
-                _MissingValue = Convert.ToDouble(internalData.Variables[dataName].Metadata[SearchStrings[kk]]);
+                _MissingValue = Convert.ToDouble(_InternalData.Variables[_DataName].Metadata[SearchStrings[kk]]);
             }
             else
             {
-                //Debug.Fail("No missing data value found for environmental data file: " + internalData.Name.ToString());
-                Console.WriteLine("No missing data value found for this variable: assigning a value of -9999");
-                _MissingValue = -9999;
+                Debug.Fail("No missing data value found for environmental data file: " + _InternalData.Name.ToString());
             }
 
             // Possible names for the latitude dimension in the NetCDF file
             SearchStrings = new string[] { "lat", "Lat", "latitude", "Latitude", "lats", "Lats", "latitudes", "Latitudes", "y" };
             // Check which position the latitude dimension is in in the NetCDF file and add this to the vector of positions. If the latitude dimension cannot be
             // found then throw an error
-            if (SearchStrings.Contains(internalData.Dimensions[0].Name.ToString()))
+            if (SearchStrings.Contains(_InternalData.Dimensions[0].Name.ToString()))
             {
                 positions[0] = 1;
             }
-            else if (SearchStrings.Contains(internalData.Dimensions[1].Name.ToString()))
+            else if (SearchStrings.Contains(_InternalData.Dimensions[1].Name.ToString()))
             {
                 positions[1] = 1;
             }
-            else if (SearchStrings.Contains(internalData.Dimensions[2].Name.ToString()))
+            else if (SearchStrings.Contains(_InternalData.Dimensions[2].Name.ToString()))
             {
                 positions[2] = 1;
             }
@@ -1443,15 +1021,15 @@ namespace Madingley
             SearchStrings = new string[] { "lon", "Lon", "longitude", "Longitude", "lons", "Lons", "long", "Long", "longs", "Longs", "longitudes", "Longitudes", "x" };
             // Check which position the latitude dimension is in in the NetCDF file and add this to the vector of positions. If the latitude dimension cannot be
             // found then throw an error
-            if (SearchStrings.Contains(internalData.Dimensions[0].Name.ToString()))
+            if (SearchStrings.Contains(_InternalData.Dimensions[0].Name.ToString()))
             {
                 positions[0] = 2;
             }
-            else if (SearchStrings.Contains(internalData.Dimensions[1].Name.ToString()))
+            else if (SearchStrings.Contains(_InternalData.Dimensions[1].Name.ToString()))
             {
                 positions[1] = 2;
             }
-            else if (SearchStrings.Contains(internalData.Dimensions[2].Name.ToString()))
+            else if (SearchStrings.Contains(_InternalData.Dimensions[2].Name.ToString()))
             {
                 positions[2] = 2;
             }
@@ -1461,28 +1039,28 @@ namespace Madingley
             }
 
             // Possible names for the monthly temporal dimension in the netCDF file
-            SearchStrings = new string[] { "time", "month", "Month", "months", "Months" };
+            SearchStrings = new string[] { "time","month", "Month", "months", "Months" };
             // Check which position the temporal dimension is in in the NetCDF file and add this to the vector of positions. If the temporal dimension cannot be
             // found then throw an error
-            if (SearchStrings.Contains(internalData.Dimensions[0].Name.ToString()))
+            if (SearchStrings.Contains(_InternalData.Dimensions[0].Name.ToString()))
             {
                 positions[0] = 3;
             }
-            else if (SearchStrings.Contains(internalData.Dimensions[1].Name.ToString()))
+            else if (SearchStrings.Contains(_InternalData.Dimensions[1].Name.ToString()))
             {
                 positions[1] = 3;
             }
-            else if (SearchStrings.Contains(internalData.Dimensions[2].Name.ToString()))
+            else if (SearchStrings.Contains(_InternalData.Dimensions[2].Name.ToString()))
             {
                 positions[2] = 3;
             }
 
             // Check the format of the specified environmental variable
-            if (internalData.Variables[dataName].TypeOfData.Name.ToString().ToLower() == "single")
+            if (_InternalData.Variables[_DataName].TypeOfData.Name.ToString().ToLower() == "single")
             {
                 // Read the environmental data into a temporary array
                 Single[, ,] TempArray;
-                TempArray = internalData.GetData<Single[, ,]>(dataName);
+                TempArray = _InternalData.GetData<Single[, ,]>(_DataName);
 
                 // Revised for speed
                 switch (positions[0])
@@ -1492,11 +1070,9 @@ namespace Madingley
                         {
                             case 2:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
+                                    
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -1508,9 +1084,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -1519,7 +1095,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -1532,14 +1108,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -1547,27 +1123,29 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
                                         else
                                         {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                            for (int ii = 0; ii < _NumLats; ii++)
+                                            {
+                                                for (int jj = 0; jj < _NumLons; jj++)
+                                                {
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, jj];
+                                                }
+                                            }
                                         }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
+                                    
                                 }
                                 break;
                             case 3:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
+                                    
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -1579,9 +1157,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -1590,7 +1168,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -1603,14 +1181,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -1618,18 +1196,22 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
                                         else
                                         {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                            for (int ii = 0; ii < _NumLats; ii++)
+                                            {
+                                                for (int jj = 0; jj < _NumLons; jj++)
+                                                {
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, jj];
+                                                }
+                                            }
                                         }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
+                                    
                                 }
                                 break;
                             default:
@@ -1642,11 +1224,8 @@ namespace Madingley
                         {
                             case 1:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -1658,9 +1237,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -1669,7 +1248,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -1682,14 +1261,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -1697,27 +1276,28 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
                                         else
                                         {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                            for (int ii = 0; ii < _NumLats; ii++)
+                                            {
+                                                for (int jj = 0; jj < _NumLons; jj++)
+                                                {
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, jj];
+                                                }
+                                            }
                                         }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
 
                                 }
                                 break;
                             case 3:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -1729,9 +1309,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -1740,7 +1320,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -1753,14 +1333,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -1768,18 +1348,22 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
                                         else
                                         {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                            for (int ii = 0; ii < _NumLats; ii++)
+                                            {
+                                                for (int jj = 0; jj < _NumLons; jj++)
+                                                {
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, jj];
+                                                }
+                                            }
                                         }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
+                                    
                                 }
                                 break;
                             default:
@@ -1792,11 +1376,8 @@ namespace Madingley
                         {
                             case 1:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -1808,9 +1389,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -1819,7 +1400,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -1832,14 +1413,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -1847,27 +1428,27 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
                                         else
                                         {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                            for (int ii = 0; ii < _NumLats; ii++)
+                                            {
+                                                for (int jj = 0; jj < _NumLons; jj++)
+                                                {
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, jj];
+                                                }
+                                            }
                                         }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
                                 }
                                 break;
                             case 2:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -1879,9 +1460,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -1890,7 +1471,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -1903,14 +1484,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -1918,18 +1499,21 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
                                         else
                                         {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
+                                            for (int ii = 0; ii < _NumLats; ii++)
+                                            {
+                                                for (int jj = 0; jj < _NumLons; jj++)
+                                                {
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, jj];
+                                                }
+                                            }
                                         }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
                                 }
                                 break;
                             default:
@@ -1943,11 +1527,11 @@ namespace Madingley
                 }
 
             }
-            else if (internalData.Variables[dataName].TypeOfData.Name.ToString().ToLower() == "double")
+            else if (_InternalData.Variables[_DataName].TypeOfData.Name.ToString().ToLower() == "double")
             {
                 // Read the environmental data into a temporary array
                 double[, ,] TempArray;
-                TempArray = internalData.GetData<double[, ,]>(dataName);
+                TempArray = _InternalData.GetData<double[, ,]>(_DataName);
                 // Revised for speed
                 switch (positions[0])
                 {
@@ -1956,11 +1540,8 @@ namespace Madingley
                         {
                             case 2:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -1972,9 +1553,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -1983,7 +1564,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -1996,14 +1577,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -2011,27 +1592,18 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
 
                                 }
                                 break;
                             case 3:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -2043,9 +1615,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -2054,7 +1626,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -2067,14 +1639,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -2082,18 +1654,11 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
                                 }
                                 break;
                             default:
@@ -2106,11 +1671,8 @@ namespace Madingley
                         {
                             case 1:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -2122,9 +1684,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -2133,7 +1695,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -2146,14 +1708,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -2161,27 +1723,18 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
 
                                 }
                                 break;
                             case 3:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -2193,9 +1746,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -2204,7 +1757,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -2217,14 +1770,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -2232,18 +1785,11 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
                                 }
                                 break;
                             default:
@@ -2256,11 +1802,8 @@ namespace Madingley
                         {
                             case 1:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -2272,9 +1815,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -2283,7 +1826,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -2296,14 +1839,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -2311,27 +1854,18 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
 
                                 }
                                 break;
                             case 2:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -2343,9 +1877,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -2354,7 +1888,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -2367,14 +1901,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -2382,18 +1916,11 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
                                 }
                                 break;
                             default:
@@ -2406,12 +1933,12 @@ namespace Madingley
                         break;
                 }
             }
-            else if (internalData.Variables[dataName].TypeOfData.Name.ToString().ToLower() == "int32")
+            else if (_InternalData.Variables[_DataName].TypeOfData.Name.ToString().ToLower() == "int32")
             {
                 // Read the environmental data into a temporary array
                 Int32[, ,] TempArray;
-                TempArray = internalData.GetData<Int32[, ,]>(dataName);
-                // Revised for speed
+                TempArray = _InternalData.GetData<Int32[, ,]>(_DataName);
+                  // Revised for speed
                 switch (positions[0])
                 {
                     case 1:
@@ -2419,11 +1946,9 @@ namespace Madingley
                         {
                             case 2:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
+                                    
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -2435,9 +1960,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -2446,7 +1971,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -2459,14 +1984,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -2474,27 +1999,19 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
+                                    
                                 }
                                 break;
                             case 3:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
+                                    
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -2506,9 +2023,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -2517,7 +2034,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -2530,14 +2047,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -2545,18 +2062,12 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
+                                    
                                 }
                                 break;
                             default:
@@ -2569,11 +2080,8 @@ namespace Madingley
                         {
                             case 1:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -2585,9 +2093,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -2596,7 +2104,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -2609,14 +2117,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -2624,27 +2132,18 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
 
                                 }
                                 break;
                             case 3:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -2656,9 +2155,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -2667,7 +2166,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -2680,14 +2179,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -2695,18 +2194,12 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
+                                    
                                 }
                                 break;
                             default:
@@ -2719,11 +2212,8 @@ namespace Madingley
                         {
                             case 1:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -2735,9 +2225,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -2746,7 +2236,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -2759,14 +2249,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -2774,27 +2264,17 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
                                 }
                                 break;
                             case 2:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -2806,9 +2286,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -2817,7 +2297,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -2830,14 +2310,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -2845,18 +2325,11 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
                                 }
                                 break;
                             default:
@@ -2870,13 +2343,13 @@ namespace Madingley
                 }
 
             }
-            else if (internalData.Variables[dataName].TypeOfData.Name.ToString().ToLower() == "int16")
+            else if (_InternalData.Variables[_DataName].TypeOfData.Name.ToString().ToLower() == "int16")
             {
                 // Read the environmental data into a temporary array
                 Int16[, ,] TempArray;
-                TempArray = internalData.GetData<Int16[, ,]>(dataName);
+                TempArray = _InternalData.GetData<Int16[, ,]>(_DataName);
 
-                // Revised for speed
+                  // Revised for speed
                 switch (positions[0])
                 {
                     case 1:
@@ -2884,11 +2357,9 @@ namespace Madingley
                         {
                             case 2:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
+                                    
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -2900,9 +2371,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -2911,7 +2382,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -2924,14 +2395,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -2939,27 +2410,19 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
+                                    
                                 }
                                 break;
                             case 3:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
+                                    
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -2971,9 +2434,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -2982,7 +2445,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -2995,14 +2458,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -3010,18 +2473,12 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
+                                    
                                 }
                                 break;
                             default:
@@ -3034,11 +2491,8 @@ namespace Madingley
                         {
                             case 1:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -3050,9 +2504,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -3061,7 +2515,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -3074,14 +2528,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -3089,27 +2543,18 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
 
                                 }
                                 break;
                             case 3:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -3121,9 +2566,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -3132,7 +2577,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -3145,14 +2590,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -3160,18 +2605,12 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
+                                    
                                 }
                                 break;
                             default:
@@ -3184,11 +2623,8 @@ namespace Madingley
                         {
                             case 1:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -3200,9 +2636,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -3211,7 +2647,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -3224,14 +2660,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -3239,27 +2675,17 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
                                 }
                                 break;
                             case 2:
                                 // Loop over time steps
-                                for (int hh = 0; hh < _NumTimes; hh++)
+                                for (int hh = timestep_elapsed; hh < timestep_elapsed+12; hh++)
                                 {
-                                    // Array to store environmental data as above, but with data in ascending order of both latitude and longitude
-                                    double[,] LatLongArraySorted = new double[_NumLats, _NumLons];
-
                                     // Add to the unsorted array of values, transposing the data to be dimensioned by latitude first and 
                                     // longitude second
                                     for (int ii = 0; ii < _NumLats; ii++)
@@ -3271,9 +2697,9 @@ namespace Madingley
                                     }
 
                                     // Transpose the environmental data so that they are in ascending order of both latitude and longitude
-                                    if (latInverted)
+                                    if (LatInverted)
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Both dimensions inverted
                                             int LatLengthMinusOne = LatLongArrayUnsorted.GetLength(0) - 1;
@@ -3282,7 +2708,7 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
@@ -3295,14 +2721,14 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[LatLengthMinusOne - ii, jj];
                                                 }
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        if (longInverted)
+                                        if (LongInverted)
                                         {
                                             // Longitude only inverted
                                             int LongLengthMinusOne = LatLongArrayUnsorted.GetLength(1) - 1;
@@ -3310,18 +2736,11 @@ namespace Madingley
                                             {
                                                 for (int jj = 0; jj < _NumLons; jj++)
                                                 {
-                                                    LatLongArraySorted[ii, jj] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
+                                                    LatLongArraySorted[ii, jj,hh-timestep_elapsed] = LatLongArrayUnsorted[ii, LongLengthMinusOne - jj];
                                                 }
                                             }
                                         }
-                                        else
-                                        {
-                                            LatLongArraySorted = (double[,])LatLongArrayUnsorted.Clone();
-                                        }
                                     }
-                                    // Add the final array to the class field for environmental data values
-                                    _DataArray.Add(LatLongArraySorted);
-
                                 }
                                 break;
                             default:
@@ -3342,7 +2761,7 @@ namespace Madingley
             }
 
             // If either latitude or longitude were inverted, then reverse their values in the class fields
-            if (latInverted)
+            if (LatInverted)
             {
                 // Temporary vector to store inverted latitude values
                 double[] tempLats = new double[_NumLats];
@@ -3357,7 +2776,7 @@ namespace Madingley
                 // Reverse the sign on the difference in latitude values between adjacent cells
                 _LatStep = -_LatStep;
             }
-            if (longInverted)
+            if (LongInverted)
             {
                 // Temporary vector to store inverted longitude values
                 double[] tempLongs = new double[_NumLons];
@@ -3377,17 +2796,18 @@ namespace Madingley
             Debug.Assert(_LatStep > 0.0, "Latitudes are still inverted in an environmental variable stored in EnviroData");
             Debug.Assert(_LonStep > 0.0, "Longitudes are still inverted in an environmental variable stored in EnviroData");
 
-        }
+            return(LatLongArraySorted);
 
+        }
 
         /// <summary>
         /// Dispose of an Envirodata instance
         /// </summary>
-        ~EnviroData()
+        ~EnviroDataTemporal()
         {
-            // Clear the data in the Envirodata instance
-            DataArray.Clear();
+            
         }
 
     }
 }
+

@@ -97,7 +97,7 @@ namespace Madingley
                     {
                         organism = "-999\tS" + Convert.ToString(S.FunctionalGroupIndex) + "\t" +
                                     "-999\t-999\t" + Convert.ToString(S.IndividualBodyMass) + "\t" +
-                                    Convert.ToString(S.TotalBiomass / S.IndividualBodyMass) + "\t" +
+                                    Convert.ToString(S.TotalBiomass) + "\t" +
                                     "-999\t-999\t-999\t-999\t-999\t-999";
                         SyncStateWriter.WriteLine(context + organism);
                     }
@@ -154,7 +154,7 @@ namespace Madingley
                 }
             }
 
-            int MaxNumberCohorts = Math.Max(CellCohortNumber, maximumNumberOfCohorts);
+            int MaxNumberCohorts = Math.Min(CellCohortNumber, maximumNumberOfCohorts);
 
             float[] Cohort = new float[MaxNumberCohorts];
             for (int c = 0; c < Cohort.Length; c++)
@@ -189,7 +189,7 @@ namespace Madingley
                 dims,currentModelGrid.GlobalMissingValue,Latitude,
                 Longitude,CohortFunctionalGroup,Cohort);
 
-                StateOutput.PutData<double[,,,]>("Cohort" + v,
+                StateOutput.PutData<float[,,,]>("Cohort" + v,
                     CalculateCurrentCohortState(currentModelGrid,v,Latitude.Length,Longitude.Length,CohortFunctionalGroup.Length,Cohort.Length,cellIndices));
 
                StateOutput.Commit();
@@ -210,7 +210,7 @@ namespace Madingley
                 dims, currentModelGrid.GlobalMissingValue, Latitude,
                 Longitude, StockFunctionalGroup, Stock);
 
-                StateOutput.PutData<double[, , ,]>("Stock" + v,
+                StateOutput.PutData<float[, , ,]>("Stock" + v,
                     CalculateCurrentStockState(currentModelGrid, v, Latitude.Length, Longitude.Length, StockFunctionalGroup.Length, Stock.Length, cellIndices));
 
                 StateOutput.Commit();
@@ -220,10 +220,22 @@ namespace Madingley
             StateOutput.Dispose();
         }
 
-        private double[, , ,] CalculateCurrentCohortState(ModelGrid currentModelState, string variableName, int numLats, int numLons, int numFG, int numCohorts, List<uint[]> cellList)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="currentModelState"></param>
+        /// <param name="variableName"></param>
+        /// <param name="numLats"></param>
+        /// <param name="numLons"></param>
+        /// <param name="numFG"></param>
+        /// <param name="numCohorts"></param>
+        /// <param name="cellList"></param>
+        /// <returns>float to reduce memory associated with the outputting of global states</returns>
+        private float[, , ,] CalculateCurrentCohortState(ModelGrid currentModelState, string variableName, int numLats, int numLons, int numFG, int numCohorts, List<uint[]> cellList)
         {
             //Calculate the cohort state
-            double[, , ,] State = new double[numLats, numLons, numFG, numCohorts];
+            float[, , ,] State = new float[numLats, numLons, numFG, numCohorts];
             GridCellCohortHandler CellCohorts;
 
             for (int cellIndex = 0; cellIndex < cellList.Count; cellIndex++)
@@ -238,37 +250,37 @@ namespace Madingley
                         switch (variableName)
                         {
                             case "JuvenileMass":
-                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = CellCohorts[functionalGroupIndex][cohortIndex].JuvenileMass;
+                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = (float)CellCohorts[functionalGroupIndex][cohortIndex].JuvenileMass;
                                 break;
                             case "AdultMass":
-                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = CellCohorts[functionalGroupIndex][cohortIndex].AdultMass;
+                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = (float)CellCohorts[functionalGroupIndex][cohortIndex].AdultMass;
                                 break;
                             case "IndividualBodyMass":
-                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = CellCohorts[functionalGroupIndex][cohortIndex].IndividualBodyMass;
+                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = (float)CellCohorts[functionalGroupIndex][cohortIndex].IndividualBodyMass;
                                 break;
                             case "CohortAbundance":
-                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = CellCohorts[functionalGroupIndex][cohortIndex].CohortAbundance;
+                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = (float)CellCohorts[functionalGroupIndex][cohortIndex].CohortAbundance;
                                 break;
                             case "BirthTimeStep":
-                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = (double)CellCohorts[functionalGroupIndex][cohortIndex].BirthTimeStep;
+                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = (float)CellCohorts[functionalGroupIndex][cohortIndex].BirthTimeStep;
                                 break;
                             case "MaturityTimeStep":
-                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = (double)CellCohorts[functionalGroupIndex][cohortIndex].MaturityTimeStep;
+                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = (float)CellCohorts[functionalGroupIndex][cohortIndex].MaturityTimeStep;
                                 break;
                             case "LogOptimalPreyBodySizeRatio":
-                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = CellCohorts[functionalGroupIndex][cohortIndex].LogOptimalPreyBodySizeRatio;
+                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = (float)CellCohorts[functionalGroupIndex][cohortIndex].LogOptimalPreyBodySizeRatio;
                                 break;
                             case "MaximumAchievedBodyMass":
-                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = CellCohorts[functionalGroupIndex][cohortIndex].MaximumAchievedBodyMass;
+                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = (float)CellCohorts[functionalGroupIndex][cohortIndex].MaximumAchievedBodyMass;
                                 break;
                             case "Merged":
-                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = Convert.ToDouble(CellCohorts[functionalGroupIndex][cohortIndex].Merged);
+                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = Convert.ToSingle(CellCohorts[functionalGroupIndex][cohortIndex].Merged);
                                 break;
                             case "TrophicIndex":
-                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = CellCohorts[functionalGroupIndex][cohortIndex].TrophicIndex;
+                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = (float)CellCohorts[functionalGroupIndex][cohortIndex].TrophicIndex;
                                 break;
                             case "ProportionTimeActive":
-                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = CellCohorts[functionalGroupIndex][cohortIndex].ProportionTimeActive;
+                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, cohortIndex] = (float)CellCohorts[functionalGroupIndex][cohortIndex].ProportionTimeActive;
                                 break;
                         }
                     }
@@ -279,10 +291,10 @@ namespace Madingley
             return State;
         }
 
-        private double[, , ,] CalculateCurrentStockState(ModelGrid currentModelState, string variableName, int numLats, int numLons, int numFG, int numStocks, List<uint[]> cellList)
+        private float[, , ,] CalculateCurrentStockState(ModelGrid currentModelState, string variableName, int numLats, int numLons, int numFG, int numStocks, List<uint[]> cellList)
         {
             //Calculate the cohort state
-            double[, , ,] State = new double[numLats, numLons, numFG, numStocks];
+            float[, , ,] State = new float[numLats, numLons, numFG, numStocks];
             GridCellStockHandler CellStocks;
 
             for (int cellIndex = 0; cellIndex < cellList.Count; cellIndex++)
@@ -297,10 +309,10 @@ namespace Madingley
                         switch (variableName)
                         {
                             case "IndividualBodyMass":
-                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, stockIndex] = CellStocks[functionalGroupIndex][stockIndex].IndividualBodyMass;
+                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, stockIndex] = (float)CellStocks[functionalGroupIndex][stockIndex].IndividualBodyMass;
                                 break;
                             case "TotalBiomass":
-                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, stockIndex] = CellStocks[functionalGroupIndex][stockIndex].TotalBiomass;
+                                State[cellList[cellIndex][0], cellList[cellIndex][1], functionalGroupIndex, stockIndex] = (float)CellStocks[functionalGroupIndex][stockIndex].TotalBiomass;
                                 break;
                         }
                     }

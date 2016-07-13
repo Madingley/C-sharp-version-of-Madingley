@@ -207,6 +207,28 @@ namespace Madingley
             nextCohortID++;
         }
 
+        public Cohort(byte functionalGroupIndex, double juvenileBodyMass, double adultBodyMass, double initialBodyMass,
+            double initialAbundance, double logOptimalPreyBodySizeRatio, double maxAchievedBodyMass, ushort birthTimeStep, ushort maturityTimestep, double proportionTimeActive, ref Int64 nextCohortID,
+            double trophicIndex, Boolean tracking)
+        {
+            _FunctionalGroupIndex = functionalGroupIndex;
+            _JuvenileMass = juvenileBodyMass;
+            _AdultMass = adultBodyMass;
+            _IndividualBodyMass = initialBodyMass;
+            _CohortAbundance = initialAbundance;
+            _BirthTimeStep = birthTimeStep;
+            _MaturityTimeStep = maturityTimestep;
+            _LogOptimalPreyBodySizeRatio = logOptimalPreyBodySizeRatio;
+            _MaximumAchievedBodyMass = maxAchievedBodyMass;
+            _Merged = false;
+            _TrophicIndex = trophicIndex;
+            _ProportionTimeActive = proportionTimeActive;
+            if (tracking) _CohortID.Add(Convert.ToUInt32(nextCohortID));
+            nextCohortID++;
+        }
+
+
+
 
         public Cohort(Cohort c)
         {

@@ -316,6 +316,7 @@ namespace Madingley
 
         /// <summary>
         /// Adds a four-dimensional variable to the specified SDS object with floating point data for all four dimensions
+        /// Amended to float variables to reduce memory associated with outputting the model state
         /// </summary>
         /// <param name="SDSObject">A reference to an SDS object</param>
         /// <param name="variableName">The name of the variable to create</param>
@@ -380,7 +381,7 @@ namespace Madingley
                 else
                 {
                     //Create array of missing values of the correct dimensions
-                    double[, , ,] tempOutData = new double[dimension1Data.Length, dimension2Data.Length, dimension3Data.Length, dimension4Data.Length];
+                    float[, , ,] tempOutData = new float[dimension1Data.Length, dimension2Data.Length, dimension3Data.Length, dimension4Data.Length];
 
                     for (int ii = 0; ii < dimension1Data.Length; ii++)
                     {
@@ -390,7 +391,7 @@ namespace Madingley
                             {
                                 for (int ll = 0; ll < dimension4Data.Length; ll++)
                                 {
-                                    tempOutData[ii, jj, kk, ll] = missingValue;
+                                    tempOutData[ii, jj, kk, ll] = (float)missingValue;
                                 }
                             }
                         }
@@ -398,11 +399,11 @@ namespace Madingley
 
 
                     //Add variable to SDS
-                    var testOut = SDSObject.AddVariable<double>(variableName, tempOutData, namesDimensions);
+                    var testOut = SDSObject.AddVariable<float>(variableName, tempOutData, namesDimensions);
 
                     //Metadata required by SDS
                     testOut.Metadata["DisplayName"] = variableName;
-                    testOut.Metadata["MissingValue"] = missingValue;
+                    testOut.Metadata["MissingValue"] = (float)missingValue;
 
 
                     //Commit changes
