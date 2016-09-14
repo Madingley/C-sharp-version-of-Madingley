@@ -229,34 +229,34 @@ namespace Madingley
             switch (dataName.ToLower())
             {
                 case "land_dtr":
-                    ds.Fetch(ClimateParameter.FC_LAND_DIURNAL_TEMPERATURE_RANGE, "landdtr", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
+                    //ds.Fetch(ClimateParameter.FC_LAND_DIURNAL_TEMPERATURE_RANGE, "landdtr", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
                     //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                    temp = (double[, ,])ds.Variables["landdtr"].GetData();
-                    _MissingValue = (double)ds.Variables["landdtr"].GetMissingValue();
+                    //temp = (double[, ,])ds.Variables["landdtr"].GetData();
+                    //_MissingValue = (double)ds.Variables["landdtr"].GetMissingValue();
                     break;
                 case "temperature":
-                    ds.Fetch(ClimateParameter.FC_TEMPERATURE, "airt", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
+                    //ds.Fetch(ClimateParameter.FC_TEMPERATURE, "airt", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
                     //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                    temp = (double[, ,])ds.Variables["airt"].GetData();
-                    _MissingValue = (double)ds.Variables["airt"].GetMissingValue();
+                    //temp = (double[, ,])ds.Variables["airt"].GetData();
+                    //_MissingValue = (double)ds.Variables["airt"].GetMissingValue();
                     break;
                 // Commenting out ocean air temperature because it is running too slow when using FetchClimate
                 case "temperature_ocean":
-                    ds.Fetch(ClimateParameter.FC_OCEAN_AIR_TEMPERATURE, "oceanairt", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
+                    //ds.Fetch(ClimateParameter.FC_OCEAN_AIR_TEMPERATURE, "oceanairt", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
                     //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                    temp = (double[, ,])ds.Variables["oceanairt"].GetData();
-                    _MissingValue = (double)ds.Variables["oceanairt"].GetMissingValue();
+                    //temp = (double[, ,])ds.Variables["oceanairt"].GetData();
+                    //_MissingValue = (double)ds.Variables["oceanairt"].GetMissingValue();
                     break;
                 case "precipitation":
-                    ds.Fetch(ClimateParameter.FC_PRECIPITATION, "precip", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
+                    //ds.Fetch(ClimateParameter.FC_PRECIPITATION, "precip", dataSource: FetchClimateDataSource); //this call will create 2D variable on dimensions records and months and fill it with a FetchClimate
                     //int NumberOfRecords = ds.Dimensions["RecordNumber"].Length; // get number of records     
-                    temp = (double[, ,])ds.Variables["precip"].GetData();
-                    _MissingValue = (double)ds.Variables["precip"].GetMissingValue();
+                    //temp = (double[, ,])ds.Variables["precip"].GetData();
+                    //_MissingValue = (double)ds.Variables["precip"].GetMissingValue();
                     break;
                 case "frost":
-                    ds.Fetch(ClimateParameter.FC_LAND_FROST_DAY_FREQUENCY, "frost", dataSource: FetchClimateDataSource);
-                    temp = (double[, ,])ds.Variables["frost"].GetData();
-                    _MissingValue = (double)ds.Variables["frost"].GetMissingValue();
+                    //ds.Fetch(ClimateParameter.FC_LAND_FROST_DAY_FREQUENCY, "frost", dataSource: FetchClimateDataSource);
+                    //temp = (double[, ,])ds.Variables["frost"].GetData();
+                    //_MissingValue = (double)ds.Variables["frost"].GetMissingValue();
                     break;
                 default:
                     Debug.Fail("No Enviro data read in for " + dataName);
@@ -274,7 +274,8 @@ namespace Madingley
                     for (int jj = 0; jj < _NumLons; jj++)
                     {
                         // Currently FetchClimate returns longitudes as the last array dimension
-                        TempArray[ii, jj] = temp[tt, ii, jj];
+                        // TEMPORARY CHANGE WHILE FETCHCLIMATE IS NOT WORKING
+                        TempArray[ii, jj] = -9999;// temp[tt, ii, jj];
                     }
                 }
                 _DataArray.Add(TempArray);

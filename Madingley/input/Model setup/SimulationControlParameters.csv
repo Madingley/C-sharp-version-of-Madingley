@@ -4,10 +4,10 @@ Length of simulation (years),100
 Burn-in (years),100
 Impact duration (years),0
 Recovery duration (years),0
-Top Latitude,65
-Bottom Latitude,-65
-Leftmost Longitude,-180
-Rightmost Longitude,180
+Top Latitude,10
+Bottom Latitude,-10
+Leftmost Longitude,-30
+Rightmost Longitude,-10
 Grid Cell Size,1
 Read State,
 Specific Location File,
@@ -17,7 +17,7 @@ Extinction Threshold,1
 Maximum Number Of Cohorts,1000
 Run Cells In Parallel,yes
 Run Simulations In Parallel,no
-Run Single Realm,terrestrial
+Run Single Realm,marine
 Impact Cell Index,all
 Dispersal only,no
 Dispersal only type,advection

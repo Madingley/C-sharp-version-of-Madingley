@@ -4,9 +4,6 @@ Local,input/Data/Original/Land,hanpp_2005,.nc,HANPP,nc,HANPP,Y,year,gC/m2/year
 Local,input/Data/Original/Land,AvailableWaterCapacity,.nc,AWC,nc,AWC,Y,year,mm
 Local,input/Data/Original/Land,NPP,.nc,NPP,nc,LandNPP,Y,month,gC/m2/day
 Local,input/Data/Original/Ocean,OceanNPP,.nc,NPP,nc,OceanNPP,Y,month,gC/m2/day
-Local,input/Data/Original/Ocean,micro_npp,.nc,microNPP,nc,microNPP,Y,month,gC/m2/day
-Local,input/Data/Original/Ocean,nano_npp,.nc,nanoNPP,nc,nanoNPP,Y,month,gC/m2/day
-Local,input/Data/Original/Ocean,pico_npp,.nc,picoNPP,nc,picoNPP,Y,month,gC/m2/day
 Local,input/Data/Original/Ocean,KennedyetalDTR_monthly_climatology,.nc,DTR,nc,OceanDTR,Y,month,degC
 Local,input/Data/Original/Ocean,averaged_u_50y_top100m_monthly,.nc,uVel,nc,uVel,Y,month,cm/s
 Local,input/Data/Original/Ocean,averaged_v_50y_top100m_monthly,.nc,vVel,nc,vVel,Y,month,cm/s
