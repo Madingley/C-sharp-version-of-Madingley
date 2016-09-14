@@ -125,8 +125,8 @@ namespace Madingley
         /// <param name="globalDiagnostics">A list of global diagnostic variables for the model grid</param>
         /// <param name="tracking">Whether process-tracking is enabled</param>
         /// <param name="specificLocations">Whether the model is being run for specific locations</param>
-        public GridCell(float latitude, uint latIndex, float longitude, uint lonIndex, float latCellSize, float lonCellSize, 
-            SortedList<string, EnviroData> dataLayers, double missingValue, FunctionalGroupDefinitions cohortFunctionalGroups, 
+        public GridCell(float latitude, uint latIndex, float longitude, uint lonIndex, float latCellSize, float lonCellSize,
+            SortedList<string, EnviroData> dataLayers, SortedList<string, EnviroDataTemporal> dataLayersTemporal, double missingValue, FunctionalGroupDefinitions cohortFunctionalGroups, 
             FunctionalGroupDefinitions stockFunctionalGroups, SortedList<string, double> globalDiagnostics,Boolean tracking,
             bool specificLocations)
         {
@@ -252,23 +252,61 @@ namespace Madingley
                 _CellEnvironment.Add(LayerName, tempVector);
             }
 
+            // Loop over variables in the list of environmental data
+            List<uint[]> tempCellList = new List<uint[]>();
+            tempCellList.Add(new uint[] {latIndex,lonIndex});
+            foreach (string LayerName in dataLayersTemporal.Keys)
+            {
+                dataLayersTemporal[LayerName].GetTemporalEnvironmentListofCells(this, tempCellList, LayerName, 0, latCellSize, lonCellSize);
+            }
 
+            RenameAndRecalculateEnvironmentalVariablesByRealm();
+
+            // Initialise the grid cell cohort and stock handlers
+            _GridCellCohorts = new GridCellCohortHandler(cohortFunctionalGroups.GetNumberOfFunctionalGroups());
+            _GridCellStocks = new GridCellStockHandler(stockFunctionalGroups.GetNumberOfFunctionalGroups());
+
+        }
+
+
+        public void RenameAndRecalculateEnvironmentalVariablesByRealm()
+        {
+            double[] tempVector;
             if (_CellEnvironment.ContainsKey("LandSeaMask"))
             {
                 if (_CellEnvironment["LandSeaMask"][0].CompareTo(0.0) == 0)
                 {
-                    if (ContainsData(_CellEnvironment["OceanTemp"], _CellEnvironment["Missing Value"][0]))
+                    if (ContainsData(_CellEnvironment["SST"], _CellEnvironment["Missing Value"][0]))
                     {
                         //This is a marine cell
-                        tempVector = new double[1];
-                        tempVector[0] = 2.0;
-                        _CellEnvironment.Add("Realm", tempVector);
+                        if(!_CellEnvironment.ContainsKey("Realm"))
+                        {
+                            tempVector = new double[1];
+                            tempVector[0] = 2.0;
+                            _CellEnvironment.Add("Realm", tempVector);
+                        }
 
-                        _CellEnvironment.Add("NPP", _CellEnvironment["OceanNPP"]);
-                        _CellEnvironment.Add("DiurnalTemperatureRange", _CellEnvironment["OceanDTR"]);
+                        if (!_CellEnvironment.ContainsKey("NPP"))
+                        {
+                            _CellEnvironment.Add("NPP", _CellEnvironment["OceanNPP"]);
+                        }
+                        else
+                        {
+                            _CellEnvironment["NPP"] = _CellEnvironment["OceanNPP"];
+                        }
+
+                        if (!_CellEnvironment.ContainsKey("DiurnalTemperatureRange"))
+                        {
+                            _CellEnvironment.Add("DiurnalTemperatureRange", _CellEnvironment["OceanDTR"]);
+                        }
+                        else
+                        {
+                            _CellEnvironment["DiurnalTemperatureRange"] = _CellEnvironment["OceanDTR"];
+                        }
+                        
                         if (_CellEnvironment.ContainsKey("Temperature"))
                         {
-                            if(_CellEnvironment.ContainsKey("SST"))
+                            if (_CellEnvironment.ContainsKey("SST"))
                             {
                                 _CellEnvironment["Temperature"] = _CellEnvironment["SST"];
                             }
@@ -285,23 +323,58 @@ namespace Madingley
                     else
                     {
                         //This is a freshwater cell and in this model formulation is characterised as belonging to the terrestrial realm
-                        tempVector = new double[1];
-                        tempVector[0] = 2.0;
-                        _CellEnvironment.Add("Realm", tempVector);
+                        if (!_CellEnvironment.ContainsKey("Realm"))
+                        {
+                            tempVector = new double[1];
+                            tempVector[0] = 2.0;
+                            _CellEnvironment.Add("Realm", tempVector);
+                        }
 
-                        _CellEnvironment.Add("NPP", _CellEnvironment["LandNPP"]);
-                        _CellEnvironment.Add("DiurnalTemperatureRange", _CellEnvironment["LandDTR"]);
+                        if (!_CellEnvironment.ContainsKey("NPP"))
+                        {
+                            _CellEnvironment.Add("NPP", _CellEnvironment["LandNPP"]);
+                        }
+                        else
+                        {
+                            _CellEnvironment["NPP"] = _CellEnvironment["LandNPP"];
+                        }
+                        if (!_CellEnvironment.ContainsKey("NPP"))
+                        {
+                            _CellEnvironment.Add("DiurnalTemperatureRange", _CellEnvironment["LandDTR"]);
+                        }
+                        else
+                        {
+                            _CellEnvironment["DiurnalTemperatureRange"] = _CellEnvironment["LandDTR"];
+                        }
                     }
                 }
                 else
                 {
                     //This is a land cell
-                    tempVector = new double[1];
-                    tempVector[0] = 1.0;
-                    _CellEnvironment.Add("Realm", tempVector);
+                    if (!_CellEnvironment.ContainsKey("Realm"))
+                    {
+                        tempVector = new double[1];
+                        tempVector[0] = 1.0;
+                        _CellEnvironment.Add("Realm", tempVector);
+                    }
 
-                    _CellEnvironment.Add("NPP", _CellEnvironment["LandNPP"]);
-                    _CellEnvironment.Add("DiurnalTemperatureRange", _CellEnvironment["LandDTR"]);
+                    if (!_CellEnvironment.ContainsKey("NPP"))
+                    {
+                        _CellEnvironment.Add("NPP", _CellEnvironment["LandNPP"]);
+                    }
+                    else
+                    {
+                        _CellEnvironment["NPP"] = _CellEnvironment["LandNPP"];
+                    }
+
+                    if (!_CellEnvironment.ContainsKey("DiurnalTemperatureRange"))
+                    {
+                        _CellEnvironment.Add("DiurnalTemperatureRange", _CellEnvironment["LandDTR"]);
+                    }
+                    else
+                    {
+                        _CellEnvironment["DiurnalTemperatureRange"] = _CellEnvironment["LandDTR"];
+                    }
 
                 }
             }
@@ -323,18 +396,40 @@ namespace Madingley
             double SumOfSquaresDifferences = tempVector.Select(val => (val - Average) * (val - Average)).Sum();
             sdtemp[0] = Math.Sqrt(SumOfSquaresDifferences / tempVector.Length);
 
-            _CellEnvironment.Add("SDTemperature", sdtemp);
-            _CellEnvironment.Add("AnnualTemperature", meantemp);
+            if (!_CellEnvironment.ContainsKey("SDTemperature"))
+            {
+                _CellEnvironment.Add("SDTemperature", sdtemp);
+            }
+            else
+            {
+                _CellEnvironment["SDTemperature"] = sdtemp;
+            }
+
+            if (!_CellEnvironment.ContainsKey("AnnualTemperature"))
+            {
+                _CellEnvironment.Add("AnnualTemperature", meantemp);
+            }
+            else
+            {
+                _CellEnvironment["AnnualTemperature"] = meantemp;
+            }
 
             //Remove unrequired cell environment layers
-            if (_CellEnvironment.ContainsKey("LandNPP")) _CellEnvironment.Remove("LandNPP");
-            if (_CellEnvironment.ContainsKey("LandDTR")) _CellEnvironment.Remove("LandDTR");
-            if (_CellEnvironment.ContainsKey("OceanNPP")) _CellEnvironment.Remove("OceanNPP");
-            if (_CellEnvironment.ContainsKey("OceanDTR")) _CellEnvironment.Remove("OceanDTR");
-            if (_CellEnvironment.ContainsKey("SST")) _CellEnvironment.Remove("SST");
+            //if (_CellEnvironment.ContainsKey("LandNPP")) _CellEnvironment.Remove("LandNPP");
+            //if (_CellEnvironment.ContainsKey("LandDTR")) _CellEnvironment.Remove("LandDTR");
+            //if (_CellEnvironment.ContainsKey("OceanNPP")) _CellEnvironment.Remove("OceanNPP");
+            //if (_CellEnvironment.ContainsKey("OceanDTR")) _CellEnvironment.Remove("OceanDTR");
+            //if (_CellEnvironment.ContainsKey("SST")) _CellEnvironment.Remove("SST");
 
             // CREATE NPP SEASONALITY LAYER
-            _CellEnvironment.Add("Seasonality", CalculateNPPSeasonality(_CellEnvironment["NPP"], _CellEnvironment["Missing Value"][0]));
+            if (!_CellEnvironment.ContainsKey("Seasonality"))
+            {
+                _CellEnvironment.Add("Seasonality", CalculateNPPSeasonality(_CellEnvironment["NPP"], _CellEnvironment["Missing Value"][0]));
+            }
+            else
+            {
+                _CellEnvironment["Seasonality"] = CalculateNPPSeasonality(_CellEnvironment["NPP"], _CellEnvironment["Missing Value"][0]);
+            }
 
             // Calculate other climate variables from temperature and precipitation
             // Declare an instance of the climate variables calculator
@@ -342,9 +437,15 @@ namespace Madingley
 
             // Calculate the fraction of the year that experiences frost
             double[] NDF = new double[1];
-            NDF[0] = CVC.GetNDF(_CellEnvironment["FrostDays"], _CellEnvironment["Temperature"],_CellEnvironment["Missing Value"][0]);
-            _CellEnvironment.Add("Fraction Year Frost", NDF);
-
+            NDF[0] = CVC.GetNDF(_CellEnvironment["FrostDays"], _CellEnvironment["Temperature"], _CellEnvironment["Missing Value"][0]);
+            if (!_CellEnvironment.ContainsKey("Fraction Year Frost"))
+            {
+                _CellEnvironment.Add("Fraction Year Frost", NDF);
+            }
+            else
+            {
+                _CellEnvironment["Fraction Year Frost"] = NDF;
+            }
             double[] frostMonthly = new double[12];
             frostMonthly[0] = Math.Min(_CellEnvironment["FrostDays"][0] / 31.0, 1.0);
             frostMonthly[1] = Math.Min(_CellEnvironment["FrostDays"][1] / 28.0, 1.0);
@@ -359,14 +460,36 @@ namespace Madingley
             frostMonthly[10] = Math.Min(_CellEnvironment["FrostDays"][10] / 30.0, 1.0);
             frostMonthly[11] = Math.Min(_CellEnvironment["FrostDays"][11] / 31.0, 1.0);
 
-            _CellEnvironment.Add("Fraction Month Frost", frostMonthly);
-            _CellEnvironment.Remove("FrostDays");
+            if (!_CellEnvironment.ContainsKey("Fraction Month Frost"))
+            {
+                _CellEnvironment.Add("Fraction Month Frost", frostMonthly);
+            }
+            else
+            {
+                _CellEnvironment["Fraction Month Frost"] = frostMonthly;
+            }
+            //_CellEnvironment.Remove("FrostDays");
 
             // Calculate AET and the fractional length of the fire season
             Tuple<double[], double, double> TempTuple = new Tuple<double[], double, double>(new double[12], new double(), new double());
             TempTuple = CVC.MonthlyActualEvapotranspirationSoilMoisture(_CellEnvironment["AWC"][0], _CellEnvironment["Precipitation"], _CellEnvironment["Temperature"]);
-            _CellEnvironment.Add("AET", TempTuple.Item1);
-            _CellEnvironment.Add("Fraction Year Fire", new double[1] { TempTuple.Item3 / 360 });
+            if (!_CellEnvironment.ContainsKey("AET"))
+            {
+                _CellEnvironment.Add("AET", TempTuple.Item1);
+            }
+            else
+            {
+                _CellEnvironment["AET"] = TempTuple.Item1;
+            }
+
+            if (!_CellEnvironment.ContainsKey("Fraction Year Fire"))
+            {
+                _CellEnvironment.Add("Fraction Year Fire", new double[1] { TempTuple.Item3 / 360 });
+            }
+            else
+            {
+                _CellEnvironment["Fraction Year Fire"] = new double[1] { TempTuple.Item3 / 360 };
+            }
 
             // Designate a breeding season for this grid cell, where a month is considered to be part of the breeding season if its NPP is at
             // least 80% of the maximum NPP throughout the whole year
@@ -382,14 +505,19 @@ namespace Madingley
                     BreedingSeason[i] = 0.0;
                 }
             }
-            _CellEnvironment.Add("Breeding Season", BreedingSeason);
+            
+            if (!_CellEnvironment.ContainsKey("Breeding Season"))
+            {
+                _CellEnvironment.Add("Breeding Season", BreedingSeason);
+            }
+            else
+            {
+                _CellEnvironment["Breeding Season"] = BreedingSeason;
+            }
 
-
-            // Initialise the grid cell cohort and stock handlers
-            _GridCellCohorts = new GridCellCohortHandler(cohortFunctionalGroups.GetNumberOfFunctionalGroups());
-            _GridCellStocks = new GridCellStockHandler(stockFunctionalGroups.GetNumberOfFunctionalGroups());
 
         }
+
 
         /// <summary>
         /// Converts any missing values to zeroes

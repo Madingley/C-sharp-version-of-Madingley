@@ -293,6 +293,12 @@
     <None Include="input\Data\Original\Ocean\averaged_v_50y_top100m_monthly.nc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="input\Data\Original\Ocean\gfdl_reanalysis_intpp_sphy_zint_monthly_1959-2004.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="input\Data\Original\Ocean\gfdl_reanalysis_to_zs_monthly_1959-2004.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="input\Data\Original\Ocean\KennedyetalDTR_monthly_climatology.nc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

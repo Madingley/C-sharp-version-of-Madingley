@@ -578,10 +578,32 @@ namespace Madingley
 
                 gridCells[c[0], c[1]].CellEnvironment[internalLayerName] = TempData;
             }
-             
-
         }
 
+
+        public void GetTemporalEnvironmentListofCells(GridCell gridCell, List<uint[]> cellList, string internalLayerName, uint TimestepElapsed,
+            float LatCellSize, float LonCellSize)
+        {
+
+            double[, ,] DataArray = EnvironmentListFromNetCDF3D((int)TimestepElapsed);
+            bool data_missing;
+
+            foreach (var c in cellList)
+            {
+                double[] TempData = new double[12];
+                for (uint i = TimestepElapsed; i < TimestepElapsed + 12; i++)
+                {
+                    data_missing = false;
+
+                    TempData[i - TimestepElapsed] = GetValue(DataArray, gridCell.CellEnvironment["Latitude"][0],
+                    gridCell.CellEnvironment["Longitude"][0], i - TimestepElapsed, out data_missing,
+                    (double)LatCellSize, (double)LonCellSize);
+                    if (data_missing) TempData[i] = _MissingValue;
+                }
+
+                gridCell.CellEnvironment[internalLayerName] = TempData;
+            }
+        }
 
 
         /// <summary>
@@ -1058,9 +1080,30 @@ namespace Madingley
             // Check the format of the specified environmental variable
             if (_InternalData.Variables[_DataName].TypeOfData.Name.ToString().ToLower() == "single")
             {
-                // Read the environmental data into a temporary array
                 Single[, ,] TempArray;
-                TempArray = _InternalData.GetData<Single[, ,]>(_DataName);
+                // Read the environmental data into a temporary array
+                if(_InternalData.Variables[_DataName].Dimensions.Count  == 4)
+                {
+                    Single[,,,] TempArray4;
+                    TempArray4 = _InternalData.GetData<Single[,,,]>(_DataName);
+                    TempArray = new Single[TempArray4.GetLength(0), TempArray4.GetLength(2), TempArray4.GetLength(3)];
+                    for (int i = 0; i < TempArray4.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < TempArray4.GetLength(2); j++)
+                        {
+                            for (int k = 0; k < TempArray4.GetLength(3); k++)
+                            {
+                                TempArray[i, j, k] = TempArray4[i, 0, j, k];
+                            }
+                        }
+                    }
+                    
+                }
+                else
+                {
+                    TempArray = _InternalData.GetData<Single[, ,]>(_DataName);
+                }
+
 
                 // Revised for speed
                 switch (positions[0])

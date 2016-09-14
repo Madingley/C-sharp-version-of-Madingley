@@ -10,8 +10,8 @@ Local,input/Data/Original/Ocean,pico_npp,.nc,picoNPP,nc,picoNPP,Y,month,gC/m2/da
 Local,input/Data/Original/Ocean,KennedyetalDTR_monthly_climatology,.nc,DTR,nc,OceanDTR,Y,month,degC
 Local,input/Data/Original/Ocean,averaged_u_50y_top100m_monthly,.nc,uVel,nc,uVel,Y,month,cm/s
 Local,input/Data/Original/Ocean,averaged_v_50y_top100m_monthly,.nc,vVel,nc,vVel,Y,month,cm/s
-Local,input/Data/Original/Ocean,gfdl_reanalysis_intpp_lphy_zint_monthly_1959-2004,.nc,intpp,nc,Large Phytoplankton,N,month,mol C m-2 s-1
-Local,input/Data/Original/Ocean,gfdl_reanalysis_to_zs_monthly_1959-2004,.nc,t0,nc,SST,N,month,degrees Celsius
+Local,input/Data/Original/Ocean,gfdl_reanalysis_intpp_sphy_zint_monthly_1959-2004,.nc,intpp,nc,OceanNPP,N,month,mol C m-2 s-1
+Local,input/Data/Original/Ocean,gfdl_reanalysis_to_zs_monthly_1959-2004,.nc,to,nc,SST,N,month,degrees Celsius
 Local,input/Data/Original/Land,cru20,.nc,tmp,nc,Temperature,Y,month,degC
 Local,input/Data/Original/Land,cru20,.nc,dtr,nc,LandDTR,Y,month,degC
 Local,input/Data/Original/Land,cru20,.nc,pre,nc,Precipitation,Y,month,mm
