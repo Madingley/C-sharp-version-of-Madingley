@@ -293,9 +293,6 @@
     <None Include="input\Data\Original\Ocean\averaged_v_50y_top100m_monthly.nc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="input\Data\Original\Ocean\bob.nc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="input\Data\Original\Ocean\KennedyetalDTR_monthly_climatology.nc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
