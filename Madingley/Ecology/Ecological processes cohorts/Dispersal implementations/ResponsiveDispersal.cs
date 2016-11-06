@@ -125,7 +125,7 @@ namespace Madingley
                     double CohortDispersed = CheckForDispersal(DispersalArray[0]);
                     if (CohortDispersed > 0)
                     {
-                        uint[] DestinationCell = CellToDisperseTo(gridForDispersal, latIndex, lonIndex, DispersalArray, DispersalArray[0], DispersalArray[4], DispersalArray[5], ref ExitDirection, ref EntryDirection);
+                        uint[] DestinationCell = CellToDisperseTo(gridForDispersal, latIndex, lonIndex, DispersalArray, CohortDispersed, DispersalArray[4], DispersalArray[5], ref ExitDirection, ref EntryDirection);
                         
                         // Update the delta array of cells to disperse to, if the cohort moves
                         if (DestinationCell[0] < 999999)
@@ -160,7 +160,7 @@ namespace Madingley
                         double CohortDispersed = CheckForDispersal(DispersalArray[0]);
                         if (CohortDispersed > 0)
                         {
-                            uint[] DestinationCell = CellToDisperseTo(gridForDispersal, latIndex, lonIndex, DispersalArray, DispersalArray[0], DispersalArray[4], DispersalArray[5], ref ExitDirection, ref EntryDirection);
+                            uint[] DestinationCell = CellToDisperseTo(gridForDispersal, latIndex, lonIndex, DispersalArray, CohortDispersed, DispersalArray[4], DispersalArray[5], ref ExitDirection, ref EntryDirection);
 
                             // Update the delta array of cells to disperse to, if the cohort moves
                             if (DestinationCell[0] < 999999)
@@ -213,7 +213,7 @@ namespace Madingley
                 
                 if (CohortDispersed > 0)
                 {
-                    uint[] DestinationCell = CellToDisperseTo(gridForDispersal, latIndex, lonIndex, DispersalArray, DispersalArray[0], DispersalArray[4], DispersalArray[5], ref ExitDirection, ref EntryDirection);
+                    uint[] DestinationCell = CellToDisperseTo(gridForDispersal, latIndex, lonIndex, DispersalArray, CohortDispersed, DispersalArray[4], DispersalArray[5], ref ExitDirection, ref EntryDirection);
 
                     // Update the delta array of cells to disperse to, if the cohort moves
                     if (DestinationCell[0] < 999999)
