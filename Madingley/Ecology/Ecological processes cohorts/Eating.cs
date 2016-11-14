@@ -240,8 +240,6 @@ namespace Madingley
             // Check that the biomasses from predation and herbivory in the deltas is a number
             Debug.Assert(!double.IsNaN(deltas["biomass"]["predation"]), "BiomassFromEating is NaN");
             Debug.Assert(!double.IsNaN(deltas["biomass"]["herbivory"]), "BiomassFromEating is NaN");
-            //Debug.Assert(deltas["biomass"]["herbivory"] > 0.0, "BiomassFromEating is negative");
-            //Debug.Assert(deltas["biomass"]["predation"] > 0.0, "BiomassFromEating is negative");
 
             double biomassEaten = 0.0;
             if (madingleyCohortDefinitions.GetBiologicalPropertyOneFunctionalGroup("carnivory assimilation",
