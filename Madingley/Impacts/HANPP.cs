@@ -214,14 +214,15 @@ namespace Madingley
                         //gridCellStocks[actingStock].TotalBiomass -= gridCellStocks[actingStock].TotalBiomass *
                         //    (Math.Min(1.0, (((currentTimestep - burninSteps) / 12.0) * humanNPPScenario.Item2)));
 
-                        RemovalRate = (Math.Min(1.0, (((currentTimestep - burninSteps) / 12.0) * humanNPPScenario.Item2)));
+                        RemovalRate = Math.Max(0.0, (Math.Min(1.0, (((currentTimestep - burninSteps) / 12.0) * humanNPPScenario.Item2))));
                     }
                     else if ((currentTimestep > (burninSteps + impactSteps)) & (currentTimestep <= (burninSteps + impactSteps + recoverySteps)))
                     {
                         //gridCellStocks[actingStock].TotalBiomass -= gridCellStocks[actingStock].TotalBiomass *
                         //    (Math.Min(1.0, (((burninSteps + impactSteps + recoverySteps - currentTimestep) / 12.0) * humanNPPScenario.Item2)));
 
-                        RemovalRate = (Math.Min(1.0, (((burninSteps + impactSteps + recoverySteps - currentTimestep) / 12.0) * humanNPPScenario.Item2)));
+                        //RemovalRate = (Math.Min(1.0, (((burninSteps + impactSteps + recoverySteps - currentTimestep) / 12.0) * humanNPPScenario.Item2)));
+                        RemovalRate = Math.Max(0.0, Math.Min(1.0, ((int)((impactSteps) - (currentTimestep - (burninSteps + impactSteps))) / 12.0) * humanNPPScenario.Item2));
                     }
 
                 }
