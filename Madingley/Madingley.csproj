@@ -271,6 +271,9 @@
     <None Include="input\Data\Original\Land\AvailableWaterCapacity.nc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="input\Data\Original\Land\cru20.nc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="input\Data\Original\Land\HANPP.nc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

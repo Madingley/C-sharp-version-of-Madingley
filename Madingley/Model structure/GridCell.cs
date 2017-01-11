@@ -257,7 +257,7 @@ namespace Madingley
             {
                 if (_CellEnvironment["LandSeaMask"][0].CompareTo(0.0) == 0)
                 {
-                    if (ContainsData(_CellEnvironment["OceanTemp"], _CellEnvironment["Missing Value"][0]))
+                    if (ContainsData(_CellEnvironment["OceanNPP"], _CellEnvironment["Missing Value"][0]))
                     {
                         //This is a marine cell
                         tempVector = new double[1];
