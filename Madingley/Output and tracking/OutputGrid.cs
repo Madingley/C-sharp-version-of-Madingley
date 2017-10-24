@@ -115,9 +115,9 @@ namespace Madingley
         private double[,] Realm;
         private double[,] HANPP;
         private double[,] FrostDays;
-
         private double[,] FracEvergreen;
-        
+        private double[,] Temperature;
+
         /// <summary>
         /// The time steps in this model simulation
         /// </summary>
@@ -152,6 +152,8 @@ namespace Madingley
         /// Instance of the class to calculate ecosystem metrics
         /// </summary>
         private EcosytemMetrics Metrics;
+
+        private UtilityFunctions Utils;
 
         public OutputGrid(string outputDetail, MadingleyModelInitialisation modelInitialisation)
         {
@@ -188,6 +190,7 @@ namespace Madingley
             if (modelInitialisation.LiveOutputs)
                 LiveOutputs = true;
 
+            Utils = new UtilityFunctions();
         }
 
         /// <summary>
@@ -262,12 +265,14 @@ namespace Madingley
             FracEvergreen = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
             Realm = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
             HANPP = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
+            Temperature = new double[ecosystemModelGrid.NumLatCells, ecosystemModelGrid.NumLonCells];
 
             // Temporary outputs for checking plant model
             DataConverter.AddVariable(GridOutput, "Fraction year frost", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
             DataConverter.AddVariable(GridOutput, "Fraction evergreen", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
             DataConverter.AddVariable(GridOutput, "Realm", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
             DataConverter.AddVariable(GridOutput, "HANPP", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
+            DataConverter.AddVariable(GridOutput, "Temperature", 3, GeographicalDimensions, ecosystemModelGrid.GlobalMissingValue, outLats, outLons, TimeSteps);
 
             // Set up outputs for medium or high output levels
             if ((ModelOutputDetail == OutputDetailLevel.Medium) || (ModelOutputDetail == OutputDetailLevel.High))
@@ -400,7 +405,7 @@ namespace Madingley
         }
 
         private void CalculateOutputs(ModelGrid ecosystemModelGrid, FunctionalGroupDefinitions cohortFunctionalGroupDefinitions,
-            FunctionalGroupDefinitions stockFunctionalGroupDefinitions, List<uint[]> cellIndices, MadingleyModelInitialisation initialisation)
+            FunctionalGroupDefinitions stockFunctionalGroupDefinitions, List<uint[]> cellIndices, MadingleyModelInitialisation initialisation, uint currentTimestep)
         {
             // Get grids of the total biomass densities of all stocks and all cohorts in each grid cell
             LogBiomassDensityGridCohorts = ecosystemModelGrid.GetStateVariableGridLogDensityPerSqKm("Biomass", "NA", cohortFunctionalGroupDefinitions.
@@ -440,6 +445,7 @@ namespace Madingley
             Realm = ecosystemModelGrid.GetEnviroGrid("Realm", 0);
 
             FrostDays = ecosystemModelGrid.GetEnviroGrid("Fraction Year Frost", 0);
+            Temperature = ecosystemModelGrid.GetEnviroGrid("Temperature", Utils.GetCurrentMonth(currentTimestep, initialisation.GlobalModelTimeStepUnit));
 
             for (int i = 0; i < ecosystemModelGrid.NumLatCells; i++)
             {
@@ -487,7 +493,7 @@ namespace Madingley
             Console.WriteLine("Writing initial grid outputs...");
 
             // Calculate the output variables
-            CalculateOutputs(ecosystemModelGrid, cohortFunctionalGroupDefinitions, stockFunctionalGroupDefinitions, cellIndices, initialisation);
+            CalculateOutputs(ecosystemModelGrid, cohortFunctionalGroupDefinitions, stockFunctionalGroupDefinitions, cellIndices, initialisation,0);
 
             // Write the total biomass of cohorts to the live display
             if (LiveOutputs)
@@ -509,6 +515,9 @@ namespace Madingley
                 0, ecosystemModelGrid.GlobalMissingValue, GridOutput);
 
             DataConverter.Array2DToSDS3D(HANPP, "HANPP", new string[] { "Latitude", "Longitude", "Time step" },
+                0, ecosystemModelGrid.GlobalMissingValue, GridOutput);
+
+            DataConverter.Array2DToSDS3D(Temperature, "Temperature", new string[] { "Latitude", "Longitude", "Time step" },
                 0, ecosystemModelGrid.GlobalMissingValue, GridOutput);
 
             // File outputs for medium and high detail levels
@@ -556,7 +565,7 @@ namespace Madingley
             stockFunctionalGroupDefinitions, List<uint[]> cellIndices, uint currentTimeStep, MadingleyModelInitialisation initialisation)
         {
             // Calculate the output variables for this time step
-            CalculateOutputs(ecosystemModelGrid, cohortFunctionalGroupDefinitions, stockFunctionalGroupDefinitions, cellIndices, initialisation);
+            CalculateOutputs(ecosystemModelGrid, cohortFunctionalGroupDefinitions, stockFunctionalGroupDefinitions, cellIndices, initialisation,currentTimeStep);
 
             // Write the total biomass of cohorts to the live display
             if (LiveOutputs)
@@ -583,6 +592,8 @@ namespace Madingley
             DataConverter.Array2DToSDS3D(FracEvergreen, "Fraction evergreen", new string[] { "Latitude", "Longitude", "Time step" },
                 (int)currentTimeStep + 1, ecosystemModelGrid.GlobalMissingValue, GridOutput);
             DataConverter.Array2DToSDS3D(HANPP, "HANPP", new string[] { "Latitude", "Longitude", "Time step" },
+                (int)currentTimeStep + 1, ecosystemModelGrid.GlobalMissingValue, GridOutput);
+            DataConverter.Array2DToSDS3D(Temperature, "Temperature", new string[] { "Latitude", "Longitude", "Time step" },
                 (int)currentTimeStep + 1, ecosystemModelGrid.GlobalMissingValue, GridOutput);
 
 

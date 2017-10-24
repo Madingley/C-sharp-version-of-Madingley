@@ -536,7 +536,7 @@ namespace Madingley
 
                      //Writing to text based output
                      WriteModelState.OutputCurrentModelState( EcosystemModelGrid, _CellList, hh);
-                     WriteModelState.OutputCurrentModelState(EcosystemModelGrid,CohortFunctionalGroupDefinitions, _CellList, CurrentTimeStep, initialisation.MaxNumberOfCohorts,"ModelState");
+                     //WriteModelState.OutputCurrentModelState(EcosystemModelGrid,CohortFunctionalGroupDefinitions, _CellList, CurrentTimeStep, initialisation.MaxNumberOfCohorts,"ModelState");
                      
 
                      OutputTimer.Stop();
