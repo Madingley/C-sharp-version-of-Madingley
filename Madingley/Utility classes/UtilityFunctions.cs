@@ -117,6 +117,199 @@ namespace Madingley
 
          }
 
+
+        /// <summary>
+        /// Returns a list of cohort indices ordered by the cohort body size (smallest first)
+        /// </summary>
+        /// <param name="gridCellCohorts">the current grid cell cohorts</param>
+        /// <param name="cohortIndices">The list of cohort indices ordered from the first cohort in the first functional
+        /// group and incrementing along the cohorts in each functional group</param>
+        /// <param name="numberIndices">The total number of cohorts</param>
+        /// <returns>A list of indices for the cohorts in order of increasing body size</returns>
+        public uint[] MassOrderedIndices(GridCellCohortHandler gridCellCohorts, uint[][] cohortIndices, uint numberIndices)
+        {
+            // A vector to hold indices of cohorts in order
+            uint[] MassOrderedIndices = new uint[numberIndices];
+            for (int i = 0; i < MassOrderedIndices.Length; i++)
+            {
+                MassOrderedIndices[i] = numberIndices * 2;
+            }
+            double MinMass = 1E9;
+            double AboveMinMass = 0;
+            int MinFG = 0;
+            int MinC = 0;
+
+            int missingIndex = -1;
+
+            for (int i = 0; i < numberIndices; i++)
+            {
+                MinMass = 999E12;
+                for (int ll = 0; ll < gridCellCohorts.Count; ll++)
+                {
+                    // Loop over gridCellCohorts in the functional group
+                    for (int kk = 0; kk < gridCellCohorts[ll].Count(); kk++)
+                    {
+                        //Check if this cohort is the smallest
+                        if (gridCellCohorts[ll][kk].IndividualBodyMass.CompareTo(MinMass) < 0 &&
+                            Array.IndexOf(MassOrderedIndices, cohortIndices[ll][kk]) == -1) //gridCellCohorts[ll][kk].IndividualBodyMass.CompareTo(AboveMinMass) > 0 &&
+                        {
+                            MinFG = ll;
+                            MinC = kk;
+                            MinMass = gridCellCohorts[ll][kk].IndividualBodyMass;
+                        }
+                    }
+                }
+
+
+                if (MinMass.CompareTo(1E9) < 0)
+                {
+                    MassOrderedIndices[i] = cohortIndices[MinFG][MinC];
+                    MinFG = 0;
+                    MinC = 0;
+                }
+                else
+                {
+                    MassOrderedIndices[i] = 999999;
+                                    }
+                //AboveMinMass = MinMass;
+            }
+
+            return MassOrderedIndices;
+
+        }
+
+
+        public uint[] WeightedMassOrderedIndices(GridCellCohortHandler gridCellCohorts, uint[][] cohortIndices, uint numberIndices)
+        {
+
+            NonStaticSimpleRNG random = new NonStaticSimpleRNG();
+            random.SetSeedFromSystemTime();
+
+            // A vector to hold indices of cohorts in order
+            int[] MassOrderedIndices;
+
+            double AboveMinMass = 0;
+
+            double OverallMinMass = 1E9;
+
+
+            double MaxMass = 0;
+            int MaxFG = 0;
+            int MaxC = 0;
+            double MinMass = 1E9;
+            int MinFG = 0;
+            int MinC = 0;
+
+            for (int ll = 0; ll < gridCellCohorts.Count; ll++)
+            {
+                // Loop over gridCellCohorts in the functional group
+                for (int kk = 0; kk < gridCellCohorts[ll].Count(); kk++)
+                {
+                    //Check if this cohort is the smallest
+                    if (gridCellCohorts[ll][kk].IndividualBodyMass.CompareTo(MaxMass) > 0)
+                    {
+                        MaxFG = ll;
+                        MaxC = kk;
+                        MaxMass = gridCellCohorts[ll][kk].IndividualBodyMass;
+                        
+                    }
+
+                    //Check if this cohort is the smallest
+                    if (gridCellCohorts[ll][kk].IndividualBodyMass.CompareTo(OverallMinMass) < 0)
+                    {
+                        MinFG = ll;
+                        MinC = kk;
+                        OverallMinMass = gridCellCohorts[ll][kk].IndividualBodyMass;
+                    }
+                }
+            }
+
+            double MassRange = MaxMass-OverallMinMass;
+            double logMassRange = Math.Log(MaxMass) - Math.Log(OverallMinMass);
+
+            MassOrderedIndices = (int[])(object)this.RandomlyOrderedIndices(numberIndices);//this.MassOrderedIndices(gridCellCohorts,cohortIndices,numberIndices);
+            
+            uint[] OrderedIndices = new uint[numberIndices];
+            int[] Acted = new int[numberIndices];
+            int[] UseIndices;
+            int[] UnActedIndices;
+            uint UnActedCounter;
+            double p = 0;
+            int OrderIndex = 0;
+            int[] Cinds;
+            do
+            {
+                //UseIndices = MassOrderedIndices.Where((x,idx) => Acted[idx] == 0).ToArray();
+                UseIndices = new int[numberIndices-Acted.Sum()];
+                UnActedIndices = new int[numberIndices-Acted.Sum()];
+                UnActedCounter = 0;
+                for (int i = 0; i < Acted.Length; i++)
+                {
+                    if(Acted[i] == 0)
+                    {
+                        UnActedIndices[UnActedCounter] = i;
+                        UnActedCounter++;
+                    }
+                }
+
+                for (int i = 0; i < UnActedIndices.Length; i++)
+                {
+                    UseIndices[i] = MassOrderedIndices[UnActedIndices[i]];
+                }
+
+                foreach (uint i in UseIndices)
+                {
+                    Cinds = FindJaggedArrayIndex(i, cohortIndices, numberIndices);
+
+                    p = (Math.Log(gridCellCohorts[Cinds[0]][Cinds[1]].IndividualBodyMass) - Math.Log(OverallMinMass)) / logMassRange;
+
+                    if (random.GetUniform() > p)
+                    {
+                        OrderedIndices[OrderIndex] = cohortIndices[Cinds[0]][Cinds[1]];
+                        OrderIndex++;
+                        Acted[Array.FindIndex(MassOrderedIndices, row => row == i)] = 1;
+                    }
+
+                }
+
+
+            } while (Acted.Sum() < (int)(numberIndices*0.8));
+
+            UseIndices = new int[numberIndices-Acted.Sum()];
+            UnActedIndices = new int[numberIndices-Acted.Sum()];
+            UnActedCounter = 0;
+            for (int i = 0; i < Acted.Length; i++)
+            {
+                if(Acted[i] == 0)
+                {
+                    UnActedIndices[UnActedCounter] = i;
+                    UnActedCounter++;
+                }
+            }
+
+            for (int i = 0; i < UnActedIndices.Length; i++)
+            {
+                UseIndices[i] = MassOrderedIndices[UnActedIndices[i]];
+            }
+
+            foreach (uint i in UseIndices)
+            {
+                Cinds = FindJaggedArrayIndex(i, cohortIndices, numberIndices);
+                OrderedIndices[OrderIndex] = cohortIndices[Cinds[0]][Cinds[1]];
+                OrderIndex++;
+                Acted[Array.FindIndex(MassOrderedIndices, row => row == i)] = 1;
+            }
+
+            //OrderedIndices[OrderIndex] = cohortIndices[MaxFG][MaxC];
+
+            
+            
+            return OrderedIndices;
+
+        }
+
+
+
         /// <summary>
         /// Get the month corresponding to the current time step
         /// </summary>
